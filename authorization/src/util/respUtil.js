@@ -1,0 +1,4 @@
+const respUtil = {
+    error() {},
+    success() {}
+};
