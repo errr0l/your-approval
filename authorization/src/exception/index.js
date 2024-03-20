@@ -12,12 +12,24 @@ class CustomException extends Error {
 }
 
 class ClientException extends CustomException {
-    constructor(message) {
-        super({ code: CODE_40001, message });
+    constructor({ code, message }) {
+        super({ code: code || CODE_40001, message });
         this.statusCode = 400;
     }
 }
 
+class OauthException extends CustomException {
+    redirectUrl;
+    joined;
+
+    constructor({ code, message, redirectUrl, joined = false }) {
+        super({ code, message });
+        this.statusCode = 200;
+        this.redirectUrl = redirectUrl;
+        this.joined = joined;
+    }
+}
+
 module.exports = {
-    CustomException, ClientException
+    CustomException, ClientException, OauthException
 }

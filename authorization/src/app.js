@@ -8,7 +8,7 @@ const app = new Koa();
 const clientRouter = require("./controller/clientController");
 const openRouter = require("./controller/openController");
 const config = require("./config/appConfig");
-const errorHandler = require("./middleware/errorHandler");
+const errorHandler = require("./middleware/globalErrorHandler");
 
 app.use(bodyParser());
 app.use(views(path.join(__dirname, "./views"), {

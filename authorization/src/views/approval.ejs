@@ -4,7 +4,7 @@
         <title>easyums - approve</title>
     </head>
     <body>
-        <p>该客户端正在请求您的个人信息（用户名、邮箱、头像等）</p>
+        <p><%=client.name %>正在请求您的个人信息（用户名、邮箱、头像等）</p>
         <h2>是否授权？</h2>
         <form class="form" action="/oauth2/approve" method="POST">
             <input type="hidden" name="uuid" value="<%=uuid %>">

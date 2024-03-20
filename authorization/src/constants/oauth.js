@@ -14,7 +14,8 @@ const errors = {
     INVALID_GRANT: 'invalid_grant',
     UNSUPPORTED_GRANT_TYPE: "unsupported_grant_type",
     UNKNOWN_CLIENT: "unknown_client",
-    UNKNOWN_REQUEST: "unknown_request"
+    UNKNOWN_REQUEST: "unknown_request",
+    INVALID_REQUEST: 'invalid_request',
 };
 
 const grantTypes = {

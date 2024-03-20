@@ -25,8 +25,12 @@ function getRequest(key) {
     return req;
 }
 
+function checkRequest(key) {
+    return (key in requestMap);
+}
+
 module.exports = {
-    getRequest, saveRequest
+    getRequest, saveRequest, checkRequest
 };
 
 // 定时删除请求
