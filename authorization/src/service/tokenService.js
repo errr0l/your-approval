@@ -7,15 +7,28 @@ const { pool } = require("../config/DBHelper");
  * @returns {Promise<*|null>}
  */
 async function getTokenById(id) {
-    const [rows] = await pool.query("select `id`, `access_token`, `refresh_token`, `scope`, `client_id` from `token` where `id` = ?", [id]);
+    const [rows] = await pool.query("select `id`, `access_token`, `refresh_token`, `scope`, `client_id`, `user_id` from `token` where `id` = ?", [id]);
     return rows.length ? rows[0] : null;
 }
 
-// 根据clientId获取token
-async function getTokenByClientId(id) {
-    const sql = "select `id`, `access_token`, `refresh_token`, `scope`, `client_id` from `token` where `client_id` = ?";
+/**
+ * 根据clientId获取token列表
+ * @param id 用户id
+ * @returns {Promise<Array>}
+ */
+async function getTokensByUserId(id) {
+    const sql = "select `id`, `access_token`, `refresh_token`, `scope`, `client_id`, `user_id` from `token` where `user_id` = ?";
     const [rows] = await pool.query(sql, [id]);
-    return rows.length ? rows[0] : null;
+    return rows;
+}
+
+// 删除用户token
+async function delTokensByUserId(id) {
+    const rows = await getTokensByUserId(id);
+    if (rows.length) {
+        const sql = "delete from `token` where `id` in (?)";
+        await pool.query(sql, [rows.map(item => item.id)]);
+    }
 }
 
 /**
@@ -31,5 +44,5 @@ async function save(tokenEntity) {
 }
 
 module.exports = {
-    getTokenById, getTokenByClientId, save
+    getTokenById, getTokensByUserId, save, delTokensByUserId
 }

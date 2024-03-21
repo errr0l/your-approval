@@ -1,19 +1,17 @@
 const Router = require('koa-router');
 const { v4: uuidV4 } = require("uuid");
 
-const {
-    AGREE, REJECT, CODE, INTERNAL_SERVER_ERROR
-} = require("../constants/general");
+const { AGREE, REJECT } = require("../constants/general");
 const { saveRequest, getRequest } = require("../util/tempStoreForRequest");
 const { joinUrl } = require("../util/urlUtil");
-const { CODE_0 } = require("../constants/responseCode");
-// const clientService = require("../service/clientService");
 const tokenService = require("../service/tokenService");
 const tokenUtil = require("../util/tokenUtil");
-const { errors: oauthErrors, grantTypes } = require("../constants/oauth");
-const { patternsForAuthorize, patternsForApprove } = require("./pattern/openPattern");
+const { errors: oauthErrors, grantTypes, responseTypes } = require("../constants/oauth");
+const { patternsForAuthorize, patternsForApprove, patternsForToken } = require("./pattern/openPattern");
 const paramChecker = require("../middleware/paramChecker");
 const { OauthException, CustomException, ClientException } = require("../exception");
+const clientService = require("../service/clientService");
+const { decodeClientCredentials } = require("../util/common");
 
 const router = new Router({
     prefix: "/oauth2"
@@ -24,16 +22,28 @@ router.get("/", async (ctx, next) => {
 });
 
 router.get("/authorize", paramChecker(patternsForAuthorize, (errors, ctx) => {
-    if (errors.length && ctx.request.query.redirect_uri) {
-        throw new OauthException({
-            code: oauthErrors.INVALID_REQUEST, message: errors.map(item => item.message).join(";"),
-            redirectUrl: ctx.request.query.redirect_uri
-        });
-    }
+    const redirectUri = decodeURIComponent(ctx.request.query.redirect_uri);
+    ctx.request.query.redirect_uri = redirectUri;
+    ctx.request.redirectUriProcessed = true;
+    throw new OauthException({
+        code: oauthErrors.INVALID_REQUEST, message: errors.join(";"),
+        redirectUri
+    });
 }), async (ctx, next) => {
     const req = ctx.request;
-    const client = req.client;
+    const { client_id: clientId, redirect_uri: redirectUri } = req.query;
+    const client = await clientService.getClientById(clientId);
+    if (!req.redirectUriProcessed) {
+        req.query.redirect_uri = decodeURIComponent(redirectUri);
+    }
+    if (!client) {
+        throw new OauthException({
+            code: oauthErrors.UNKNOWN_CLIENT,
+            redirectUrl: req.redirectUrl
+        });
+    }
     const uuid = uuidV4();
+    req.client = client;
     saveRequest(uuid, req);
     await ctx.render('approval', {
         client, uuid
@@ -45,11 +55,15 @@ router.get("/authorize", paramChecker(patternsForAuthorize, (errors, ctx) => {
 router.post("/approve", paramChecker(patternsForApprove, null), async (ctx, next) => {
     const { action, uuid, scope } = ctx.request.body;
     const preReq = getRequest(uuid);
+    if (!preReq) {
+        throw new CustomException({ code: oauthErrors.UNKNOWN_REQUEST });
+    }
     let { response_type: responseType, redirect_uri: redirectUri, state } = preReq.query;
     const queries = {};
     // 同意授权
     if (action === AGREE) {
-        if (responseType === CODE) {
+        // 授权码模式
+        if (responseType === responseTypes.CODE) {
             const code = uuidV4().replaceAll("-", "");
             queries['code'] = code;
             if (state) {
@@ -70,48 +84,55 @@ router.post("/approve", paramChecker(patternsForApprove, null), async (ctx, next
     await ctx.redirect(redirectUrl);
 });
 
-// 兑换令牌；
-// 包括：access_token，refresh_token，以及code（可以看作是对话访问令牌的一次性令牌）；
-router.post("/token", async (ctx, next) => {
+// 兑换token；
+router.post("/token", paramChecker(patternsForToken, (errors, ctx) => {
+    throw new ClientException({ message: errors.join(";") });
+}), async (ctx, next) => {
     const req = ctx.request;
-    const { grant_type: grantType, code, redirect_uri: redirectUri, scope, client_id: clientId } = req.body;
+    const { grant_type: grantType, code, client_id: clientId, redirect_uri: redirectUri } = req.body;
     const preReq = getRequest(code);
-    const client = preReq.state.client;
+    // 校验code
     if (!preReq) {
-        throw new ClientException({ code: oauthErrors.INVALID_GRANT, message: "未知的code" });
+        throw new ClientException({ code: oauthErrors.INVALID_CODE });
     }
-    // const authorization = req.headers['Authorization'];
-    // const { id, secret } = decodeClientCredentials(authorization);
-
+    const client = preReq.client;
+    const { secret } = decodeClientCredentials(req.headers['authorization']);
     // 校验客户端
-    // if (!id || !secret || client.id !== id || client.secret !== secret) {
-    // 是否需要传输秘钥？
-    if (client.id !== clientId) {
-        throw new ClientException({ code: oauthErrors.INVALID_GRANT, message: "未知的客户端" });
+    if ((client.id !== +clientId) || (client.secret !== secret)) {
+        throw new ClientException({ code: oauthErrors.INVALID_CLIENT });
     }
+    // 校验重定向地址
+    if (!client.redirect_uris.includes(redirectUri)) {
+        throw new ClientException({ code: oauthErrors.INVALID_REDIRECT_URI });
+    }
+
+    const user = preReq.user || { id: 1 };
 
     let respData;
     if (grantType === grantTypes.AUTHORIZATION_TYPE) {
-        const payload = { clientId }
+        const payload = { clientId, userId: user.id };
         respData = {
-            error: CODE_0,
+            error: '',
             payload: {
                 access_token: tokenUtil.generateToken(payload),
                 refresh_token: tokenUtil.generateRefreshToken(payload),
-                token_type: "bearer", scope
+                token_type: "bearer"
             }
         };
-        const tokenEntity = {
-            accessToken: respData.payload.accessToken,
-            refreshToken: respData.payload.refreshToken,
-            clientId, userId: 1, // 待写
-        };
-        if (!(await tokenService.save(tokenEntity))) {
-            throw new CustomException({ code: INTERNAL_SERVER_ERROR, message: "" });
-        }
     }
-    else {
-        throw new CustomException({ code: oauthErrors.UNSUPPORTED_GRANT_TYPE, message: "", statusCode: 400 });
+
+    try {
+        // 保证每个用户仅有一个token记录
+        await tokenService.delTokensByUserId(user.id);
+        const tokenEntity = {
+            accessToken: respData.payload.access_token,
+            refreshToken: respData.payload.refresh_token,
+            clientId, userId: user.id
+        };
+        await tokenService.save(tokenEntity);
+    } catch (error) {
+        console.log(error);
+        throw new CustomException();
     }
     return ctx.body = respData;
 });

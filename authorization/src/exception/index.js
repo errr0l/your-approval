@@ -1,19 +1,18 @@
-const { CODE_50001, CODE_40001 } = require("../constants/responseCode");
-const { INTERNAL_SERVER_ERROR } = require("../constants/general");
+const { errors } = require("../constants/oauth");
 
 class CustomException extends Error {
     code;
     statusCode;
-    constructor({ code, message, statusCode }) {
-        super(message || INTERNAL_SERVER_ERROR);
-        this.code = code || CODE_50001;
+    constructor({ code, message, statusCode } = {}) {
+        super(message || "");
+        this.code = code || errors.INTERNAL_SERVER_ERROR;
         this.statusCode = statusCode || 500;
     }
 }
 
 class ClientException extends CustomException {
     constructor({ code, message }) {
-        super({ code: code || CODE_40001, message });
+        super({ code: code || errors.INVALID_REQUEST, message });
         this.statusCode = 400;
     }
 }

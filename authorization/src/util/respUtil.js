@@ -20,7 +20,7 @@ function getQuantify(MIMEType) {
 // 获取最佳的MIME类型
 function getBestMIMEType(accept) {
     const MIMETypes = accept.split(',');
-    let best, quantity;
+    let best, quantity = 0;
     for (const MIMEType of MIMETypes) {
         for (const supportedMIMEType of supportedMIMETypes) {
             if (MIMEType.startsWith(supportedMIMEType)) {

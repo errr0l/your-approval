@@ -1,18 +1,17 @@
 const { getBestMIMEType, MIME_HTML } = require("../util/respUtil");
-const { CODE_50001 } = require("../constants/responseCode");
-const { INTERNAL_SERVER_ERROR } = require("../constants/general");
+const { errors } = require("../constants/oauth");
 const { joinUrl } = require("../util/urlUtil");
-const { errors: oauthErrors } = require("../constants/oauth");
 const { OauthException } = require("../exception");
 
 async function globalErrorHandler(ctx, next) {
     try {
         await next();
     } catch (error) {
+        console.error(error);
         const req = ctx.request;
         const accept = req.headers['accept'];
         const bestMIMEType = getBestMIMEType(accept);
-        const respData = { error: error.code || CODE_50001, error_description: error.message || INTERNAL_SERVER_ERROR };
+        const respData = { error: error.code || errors.INTERNAL_SERVER_ERROR, error_description: error.message || "" };
         // 若error为OauthException类型，则进行重定向；
         if (error instanceof OauthException) {
             // joined：是否已经完成url拼接

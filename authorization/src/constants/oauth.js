@@ -16,6 +16,11 @@ const errors = {
     UNKNOWN_CLIENT: "unknown_client",
     UNKNOWN_REQUEST: "unknown_request",
     INVALID_REQUEST: 'invalid_request',
+    INVALID_CODE: "invalid_code",
+    INTERNAL_SERVER_ERROR: "internal_server_error",
+    INVALID_CLIENT: "invalid_client",
+    INVALID_REDIRECT_URI: "invalid_redirect_uri",
+    UNSUPPORTED_POSITION: "unsupported_position"
 };
 
 const grantTypes = {
