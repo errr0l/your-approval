@@ -2,7 +2,6 @@ const Router = require('koa-router');
 const { v4: uuidV4 } = require("uuid");
 
 const { AGREE, REJECT } = require("../constants/general");
-const { saveRequest, getRequest } = require("../util/tempStoreForRequest");
 const { joinUrl } = require("../util/urlUtil");
 const tokenService = require("../service/tokenService");
 const tokenUtil = require("../util/tokenUtil");
@@ -12,6 +11,7 @@ const paramChecker = require("../middleware/paramChecker");
 const { OauthException, CustomException, ClientException } = require("../exception");
 const clientService = require("../service/clientService");
 const { decodeClientCredentials } = require("../util/common");
+const { codeStore, requestStore } = require("../store");
 
 const router = new Router({
     prefix: "/oauth2"
@@ -44,7 +44,7 @@ router.get("/authorize", paramChecker(patternsForAuthorize, (errors, ctx) => {
     }
     const uuid = uuidV4();
     req.client = client;
-    saveRequest(uuid, req);
+    requestStore.save(uuid, req)
     await ctx.render('approval', {
         client, uuid
     });
@@ -54,7 +54,7 @@ router.get("/authorize", paramChecker(patternsForAuthorize, (errors, ctx) => {
 // 用户可在授权页面上进行操作；
 router.post("/approve", paramChecker(patternsForApprove, null), async (ctx, next) => {
     const { action, uuid, scope } = ctx.request.body;
-    const preReq = getRequest(uuid);
+    const preReq = requestStore.get(uuid);
     if (!preReq) {
         throw new CustomException({ code: oauthErrors.UNKNOWN_REQUEST });
     }
@@ -73,7 +73,7 @@ router.post("/approve", paramChecker(patternsForApprove, null), async (ctx, next
             const req = ctx.request;
             req.client = client;
             req.scope = scope;
-            saveRequest(code, req);
+            codeStore.save(code, req);
         }
     }
     // 不同意这里算是操作成功的流程；怎么判断是应该渲染还是重定向？还是说，一律把错误返回？
@@ -90,7 +90,7 @@ router.post("/token", paramChecker(patternsForToken, (errors, ctx) => {
 }), async (ctx, next) => {
     const req = ctx.request;
     const { grant_type: grantType, code, client_id: clientId, redirect_uri: redirectUri } = req.body;
-    const preReq = getRequest(code);
+    const preReq = codeStore.get(code);
     // 校验code
     if (!preReq) {
         throw new ClientException({ code: oauthErrors.INVALID_CODE });

@@ -4,12 +4,14 @@
         <title>easyums - approve</title>
     </head>
     <body>
-        <p><%=client.name %>正在请求您的个人信息（用户名、邮箱、头像等）</p>
-        <h2>是否授权？</h2>
-        <form class="form" action="/oauth2/approve" method="POST">
-            <input type="hidden" name="uuid" value="<%=uuid %>">
-            <button type="submit" class="btn btn-success" name="action" value="1">同意</button>
-            <button type="submit" class="btn btn-danger" name="action" value="0">拒绝</button>
-        </form>
+        <div style="margin: 14px;">
+            <p><%=client.name %>正在请求您的个人信息（用户名、邮箱、头像等）</p>
+            <h2>是否授权？</h2>
+            <form class="form" action="/oauth2/approve" method="POST">
+                <input type="hidden" name="uuid" value="<%=uuid %>">
+                <button type="submit" class="btn btn-success" name="action" value="1">同意</button>
+                <button type="submit" class="btn btn-danger" name="action" value="0">拒绝</button>
+            </form>
+        </div>
     </body>
 </html>

@@ -11,7 +11,7 @@ class CustomException extends Error {
 }
 
 class ClientException extends CustomException {
-    constructor({ code, message }) {
+    constructor({ code, message } = {}) {
         super({ code: code || errors.INVALID_REQUEST, message });
         this.statusCode = 400;
     }

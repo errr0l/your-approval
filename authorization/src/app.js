@@ -7,6 +7,8 @@ const app = new Koa();
 
 const clientRouter = require("./controller/clientController");
 const openRouter = require("./controller/openController");
+const testRouter = require("./controller/testController");
+
 const config = require("./config/appConfig");
 const errorHandler = require("./middleware/globalErrorHandler");
 
@@ -18,8 +20,7 @@ app.use(views(path.join(__dirname, "./views"), {
 app.use(errorHandler);
 app.use(clientRouter.routes());
 app.use(openRouter.routes());
-
-// 读取配置文件
+app.use(testRouter.routes());
 
 const server = app.listen(config.server.port, "localhost", function () {
     const host = server.address().address;
