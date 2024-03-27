@@ -4,6 +4,7 @@ const { responseTypes, grantTypes } = require("../../constants/oauth");
 // const { checkRequest, getRequest } = require("../../util/tempStoreForRequest");
 const { AGREE, REJECT } = require("../../constants/general");
 // const { decodeClientCredentials } = require("../../util/common");
+const config = require("../../config/appConfig");
 
 // 当然，不以这种方式来校验也是可以的，只是说使用这种校验形式可以使得业务代码更集中;
 // 重新考虑了一下，虽然js可以轻易做到在任何地方做校验，但其他语言可能不行，所以有些校验应该放在业务层，这里只校验一些静态规则；
@@ -47,6 +48,11 @@ const patternsForAuthorize = [{
         //     }
         //     return errors;
         // }
+    }, {
+        name: "scope",
+        validator(value, _this, ctx) {
+
+        }
     }]
 }];
 

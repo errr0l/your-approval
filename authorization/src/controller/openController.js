@@ -44,7 +44,7 @@ router.get("/authorize", paramChecker(patternsForAuthorize, (errors, ctx) => {
     }
     const uuid = uuidV4();
     req.client = client;
-    requestStore.save(uuid, req)
+    requestStore.save(uuid, req);
     await ctx.render('approval', {
         client, uuid
     });
