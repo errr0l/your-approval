@@ -5,13 +5,37 @@
     </head>
     <body>
         <div style="margin: 14px;">
-            <p><%=client.name %>正在请求您的个人信息（用户名、邮箱、头像等）</p>
-            <h2>是否授权？</h2>
+            <% if (user) { %>
+            <form class="form" action="/oauth2/login" method="POST">
+                <input type="text" name="username" placeholder="用户名/邮箱" />
+                <input type="password" name="password" placeholder="密码" />
+
+                <button type="submit" class="btn btn-success" name="action" value="1">登陆</button>
+                <button type="submit" class="btn btn-danger" name="action" value="2">返回</button>
+            </form>
+            <% } else { %>
+            <p><%=client.name %>正在请求您以下的权限：</p>
             <form class="form" action="/oauth2/approve" method="POST">
                 <input type="hidden" name="uuid" value="<%=uuid %>">
+                <ul style="padding: 0;">
+                    <% askedScopes.forEach(function (item) { %>
+                        <% var openid = item === 'openid'; %>
+                        <% if (openid) { %>
+                        <li style="display: none;">
+                            <input id="scope_<%=item%>" name="scope_<%=item%>" checked type="checkbox" />
+                        </li>
+                        <% } else { %>
+                        <li>
+                            <input id="scope_<%=item%>" name="scope_<%=item%>" checked type="checkbox" />
+                            <span><%=scopes[item]%></span>
+                        </li>
+                        <% } %>
+                    <% }) %>
+                </ul>
                 <button type="submit" class="btn btn-success" name="action" value="1">同意</button>
-                <button type="submit" class="btn btn-danger" name="action" value="0">拒绝</button>
+                <button type="submit" class="btn btn-danger" name="action" value="2">拒绝</button>
             </form>
+            <% } %>
         </div>
     </body>
 </html>

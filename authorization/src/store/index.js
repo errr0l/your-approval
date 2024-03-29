@@ -6,5 +6,5 @@ let requestTTL = +config.server.request_ttl;
 
 module.exports = {
     codeStore: new SimpleMemoryStore(codeExpiresIn),
-    requestStore:  new SimpleMemoryStore(requestTTL)
+    requestStore: new SimpleMemoryStore(requestTTL)
 }

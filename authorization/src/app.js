@@ -24,9 +24,12 @@ app.use(clientRouter.routes());
 app.use(openRouter.routes());
 app.use(testRouter.routes());
 
-const server = app.listen(config.server.port, "192.168.3.18", function () {
-    const host = server.address().address;
+// "192.168.3.18",
+const server = app.listen(config.server.port, function () {
+    let host = server.address().address;
     const port = server.address().port;
-
+    if (host === "::") {
+        host = "localhost";
+    }
     console.log('The Server is listening at http://%s:%s', host, port);
 });

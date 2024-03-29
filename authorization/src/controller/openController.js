@@ -1,7 +1,7 @@
 const Router = require('koa-router');
 const { v4: uuidV4 } = require("uuid");
 
-const { AGREE, REJECT } = require("../constants/general");
+const { ACT_1, ACT_2, ID_TOKEN } = require("../constants/general");
 const { joinUrl } = require("../util/urlUtil");
 const tokenService = require("../service/tokenService");
 const tokenUtil = require("../util/tokenUtil");
@@ -12,6 +12,7 @@ const { OauthException, CustomException, ClientException } = require("../excepti
 const clientService = require("../service/clientService");
 const { decodeClientCredentials } = require("../util/common");
 const { codeStore, requestStore } = require("../store");
+const config = require("../config/appConfig");
 
 const router = new Router({
     prefix: "/oauth2"
@@ -21,17 +22,21 @@ router.get("/", async (ctx, next) => {
     ctx.body = "easyums oauth";
 });
 
+router.post("/", async (ctx) => {
+   const { username, password } = ctx.request.body;
+});
+
 router.get("/authorize", paramChecker(patternsForAuthorize, (errors, ctx) => {
     const redirectUri = decodeURIComponent(ctx.request.query.redirect_uri);
     ctx.request.query.redirect_uri = redirectUri;
     ctx.request.redirectUriProcessed = true;
     throw new OauthException({
         code: oauthErrors.INVALID_REQUEST, message: errors.join(";"),
-        redirectUri
+        redirectUrl: redirectUri
     });
 }), async (ctx, next) => {
     const req = ctx.request;
-    const { client_id: clientId, redirect_uri: redirectUri } = req.query;
+    const { client_id: clientId, redirect_uri: redirectUri, scope } = req.query;
     const client = await clientService.getClientById(clientId);
     if (!req.redirectUriProcessed) {
         req.query.redirect_uri = decodeURIComponent(redirectUri);
@@ -45,8 +50,13 @@ router.get("/authorize", paramChecker(patternsForAuthorize, (errors, ctx) => {
     const uuid = uuidV4();
     req.client = client;
     requestStore.save(uuid, req);
+    const scopes = config.oauth.scopes;
+    let askedScopes = req._scopes;
+    if (!askedScopes) {
+        askedScopes = scope.trim().split(" ");
+    }
     await ctx.render('approval', {
-        client, uuid
+        client, uuid, scopes, askedScopes
     });
 });
 
@@ -61,7 +71,7 @@ router.post("/approve", paramChecker(patternsForApprove, null), async (ctx, next
     let { response_type: responseType, redirect_uri: redirectUri, state } = preReq.query;
     const queries = {};
     // 同意授权
-    if (action === AGREE) {
+    if (action === ACT_1) {
         // 授权码模式
         if (responseType === responseTypes.CODE) {
             const code = uuidV4().replaceAll("-", "");
@@ -73,11 +83,12 @@ router.post("/approve", paramChecker(patternsForApprove, null), async (ctx, next
             const req = ctx.request;
             req.client = client;
             req.scope = scope;
+            req._containedOpenid = preReq._containedOpenid;
             codeStore.save(code, req);
         }
     }
     // 不同意这里算是操作成功的流程；怎么判断是应该渲染还是重定向？还是说，一律把错误返回？
-    else if (action === REJECT) {
+    else if (action === ACT_2) {
         queries['error'] = oauthErrors.ACCESS_DENIED;
     }
     const redirectUrl = joinUrl(redirectUri, queries);
@@ -96,9 +107,9 @@ router.post("/token", paramChecker(patternsForToken, (errors, ctx) => {
         throw new ClientException({ code: oauthErrors.INVALID_CODE });
     }
     const client = preReq.client;
-    const { secret } = decodeClientCredentials(req.headers['authorization']);
+    const { secret, id } = decodeClientCredentials(req.headers['authorization']);
     // 校验客户端
-    if ((client.id !== +clientId) || (client.secret !== secret)) {
+    if ((+id !== clientId) || (client.id !== clientId) || (client.secret !== secret)) {
         throw new ClientException({ code: oauthErrors.INVALID_CLIENT });
     }
     // 校验重定向地址
@@ -110,7 +121,7 @@ router.post("/token", paramChecker(patternsForToken, (errors, ctx) => {
 
     let respData;
     if (grantType === grantTypes.AUTHORIZATION_TYPE) {
-        const payload = { clientId, userId: user.id };
+        const payload = { clientId, userId: user.id, scope: preReq.scope };
         respData = {
             error: '',
             payload: {
@@ -119,6 +130,16 @@ router.post("/token", paramChecker(patternsForToken, (errors, ctx) => {
                 token_type: "bearer"
             }
         };
+
+        // 在校验时添加的属性
+        if (preReq._containedOpenid) {
+            const payload = {
+                sub: user.id,
+                aud: clientId,
+                user
+            };
+            respData.payload[ID_TOKEN] = tokenUtil.generateIdToken(payload);
+        }
     }
 
     try {
@@ -127,7 +148,7 @@ router.post("/token", paramChecker(patternsForToken, (errors, ctx) => {
         const tokenEntity = {
             accessToken: respData.payload.access_token,
             refreshToken: respData.payload.refresh_token,
-            clientId, userId: user.id
+            clientId, userId: user.id, cope: preReq.scope
         };
         await tokenService.save(tokenEntity);
     } catch (error) {

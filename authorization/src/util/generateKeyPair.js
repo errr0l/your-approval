@@ -15,15 +15,13 @@ const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
     privateKeyEncoding: {
         type: 'pkcs8',     // 私钥编码格式
         format: 'pem',     // 私钥文件格式
-        cipher: 'aes-256-cbc', // 私钥加密方式
-        passphrase: config.keypair.passphrase // 私钥密码
     }
 });
 
 
 try {
-    fs.writeFileSync(path.resolve(process.cwd(), './rsa_private_key.pem'), privateKey);
-    fs.writeFileSync(path.resolve(process.cwd(), './rsa_public_key.pem'), publicKey);
+    fs.writeFileSync(path.resolve(process.cwd(), './secrets/rsa_private_key.pem'), privateKey);
+    fs.writeFileSync(path.resolve(process.cwd(), './secrets/rsa_public_key.pem'), publicKey);
 } catch (error) {
     console.log(error);
 }

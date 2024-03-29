@@ -51,7 +51,35 @@ const patternsForAuthorize = [{
     }, {
         name: "scope",
         validator(value, _this, ctx) {
+            let errors = [];
+            if (!value) {
+                errors.push("权限范围不能为空");
+            }
+            else {
+                value = value.trim();
+                const scopes = config.oauth.scopes;
+                let containedOpenid = false;
+                const _scopes = value.split(" ");
 
+                const scopeArr = Object.keys(scopes);
+                for (let _scope of _scopes) {
+                    if (!scopeArr.includes(_scope)) {
+                        errors.push("无效的权限范围");
+                        break;
+                    }
+                    if (!containedOpenid && _scope === 'openid') {
+                        containedOpenid = true;
+                    }
+                }
+
+                // 如果使用了oidc，则必须包含openid
+                if (/(profile|email|phone|address)/.test(value) && !containedOpenid) {
+                    errors.push("缺少openid权限范围");
+                }
+                ctx.request._scopes = _scopes; // 申请的权限
+                ctx.request._containedOpenid = containedOpenid;
+            }
+            return errors;
         }
     }]
 }];

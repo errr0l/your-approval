@@ -36,8 +36,13 @@ function paramChecker(patterns, errorHandler) {
                 else {
                     throw new CustomException({ message: oauthErrors.UNSUPPORTED_POSITION });
                 }
-                if (required && !value) {
-                    errors.push(name + '不能为空');
+                if (required) {
+                    if (typeof value == 'string') {
+                        value = value.trim();
+                    }
+                    if (!value) {
+                        errors.push(name + '不能为空');
+                    }
                 }
                 if (typeof validator == 'function') {
                     try {
