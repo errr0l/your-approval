@@ -1,5 +1,5 @@
 // 数据库配置
-const mysql = require("mysql2/promise")
+const mysql = require("mysql2/promise");
 
 const config = require("./appConfig");
 

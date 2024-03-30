@@ -7,38 +7,43 @@ const { ClientException } = require("../exception");
 // 账号密码登录；
 // username可以是用户名或邮箱
 async function login(username, password) {
-
-    const user = await selectByUsername(username);
-
-    if (user) {
-        if (encodeWithMd5(password) !== user.password) {
-            return null;
-        }
+    const sql = "select * from `user` where `username` = ? or `email` = ?";
+    const [rows] = await pool.query(sql, [username, username]);
+    const user = rows.length ? rows[0] : null;
+    if (!user || encodeWithMd5(password) !== user.password) {
+        throw new ClientException({ message: '用户名或密码不正确' });
     }
+    user.password = "";
     return user;
 }
 
-async function selectByUsername(username) {
+async function selectByUsernameOrEmail(username, email) {
     const sql = "select * from `user` where `username` = ? or `email` = ?";
-    const [rows] = await pool.query(sql, [username, username]);
+    const [rows] = await pool.query(sql, [username, email]);
     return rows.length ? rows[0] : null;
 }
 
 // 注册账号；
 // 用户名和邮箱必须唯一
 async function register(user) {
-    const _user = await selectByUsername(user.username);
+    const { username, password, email } = user;
+    const _user = await selectByUsernameOrEmail(username, email);
     if (_user) {
-        throw new ClientException({ message: '' });
+        if (_user.username === username) {
+            throw new ClientException({ message: '该用户名已经存在' });
+        }
+        else {
+            throw new ClientException({ message: '该用邮箱已经被使用' });
+        }
     }
     const date = new Date();
     const sql = "insert into `user` (`username`, `password`, `avatar`, `created_at`, `email`, `state`, `introduction`) values (?, ?, ?, ?, ?, ?, ?)";
 
     const defaultState = 1;
-    const [result] = await pool.query(sql, [user.username, encodeWithMd5(user.password), user.avatar, date, user.email, defaultState, ""]);
+    const [result] = await pool.query(sql, [username, encodeWithMd5(password), "", date, email, defaultState, ""]);
     return result.affectedRows === 1;
 }
 
 module.exports = {
-    login
+    login, register
 };

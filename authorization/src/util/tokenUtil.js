@@ -58,7 +58,6 @@ function generateIdToken(payload={}) {
     payload['type'] = ID_TOKEN;
     if (!rsaPrimaryKey) {
         rsaPrimaryKey = fs.readFileSync(config.jwt.rsa_primary_key, { encoding: 'utf-8'});
-        console.log(rsaPrimaryKey);
     }
     const opts = {
         issuer: "easyums oauth",

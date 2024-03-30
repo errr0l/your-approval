@@ -10,7 +10,7 @@ const { errors: oauthErrors } = require("../constants/oauth");
  * @param {Function} errorHandler 错误处理；可以选择自己实现错误处理的规则；
  * @returns {(function(*, *))|*}
  */
-function paramChecker(patterns, errorHandler) {
+function paramChecker(patterns, errorHandler = null) {
     return async function (ctx, next) {
         const query = ctx.request.query;
         const body = ctx.request.body;
@@ -62,7 +62,7 @@ function paramChecker(patterns, errorHandler) {
             }
         }
         if (errors.length) {
-            if (typeof errorHandler == 'function') {
+            if (errorHandler && typeof errorHandler == 'function') {
                 errorHandler(errors, ctx);
             }
             throw new ClientException({ message: errors.join(";") });

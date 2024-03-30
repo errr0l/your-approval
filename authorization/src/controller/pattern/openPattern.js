@@ -2,7 +2,7 @@
 const { responseTypes, grantTypes } = require("../../constants/oauth");
 // const clientService = require("../../service/clientService");
 // const { checkRequest, getRequest } = require("../../util/tempStoreForRequest");
-const { AGREE, REJECT } = require("../../constants/general");
+const { ACT_1, ACT_2 } = require("../../constants/general");
 // const { decodeClientCredentials } = require("../../util/common");
 const config = require("../../config/appConfig");
 
@@ -109,7 +109,7 @@ const patternsForApprove = [{
                 errors.push(this.name + "不能为空");
             }
             else {
-                if (value !== AGREE && value !== REJECT) {
+                if (value !== ACT_1 && value !== ACT_2) {
                     errors.push(this.name + "格式错误")
                 }
             }
@@ -222,6 +222,20 @@ const patternsForToken = [{
     }]
 }];
 
+const patternsForLogin = [{
+    position: "body",
+    rules: [{
+        name: "username",
+        required: true,
+    }]
+}, {
+    position: "body",
+    rules: [{
+        name: "password",
+        required: true,
+    }]
+}];
+
 module.exports = {
-    patternsForAuthorize, patternsForApprove, patternsForToken
+    patternsForAuthorize, patternsForApprove, patternsForToken, patternsForLogin
 }

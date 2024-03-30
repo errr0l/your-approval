@@ -17,6 +17,25 @@ function encodeWithMd5(str) {
     return crypto.createHash('md5').update(str).digest('hex');
 }
 
+/**
+ * 从表单属性中获取权限范围；
+ * 权限范围在表单中，以"scope_"开头；
+ * 从对象中读取以scope_开头的属性，并裁剪&返回；
+ * （注意，被勾选的权限，其值为on；未勾选的不会被提交）
+ * @param {Object} scopes
+ * @returns {Array<String>}
+ */
+function getScopesFromBody(scopes) {
+    const _scopes = [];
+    const prefix = "scope_";
+    for (const key in scopes) {
+        if (key.startsWith(prefix)) {
+            _scopes.push(key.replace(prefix, ""));
+        }
+    }
+    return _scopes;
+}
+
 module.exports = {
-    decodeClientCredentials, encodeWithMd5
+    decodeClientCredentials, encodeWithMd5, getScopesFromBody
 };

@@ -21,7 +21,10 @@ const ACCESS_TOKEN = "access_token";
 const REFRESH_TOKEN = "refresh_token";
 const ID_TOKEN = "id_token";
 
+// redis result
+const REDIS_OK = "OK";
+
 module.exports = {
     ACCESS_TOKEN, REFRESH_TOKEN, ID_TOKEN, ACT_1, ACT_2,
-    PARAM_POSITION_QUERY, PARAM_POSITION_BODY, PARAM_POSITION_HEADER
+    PARAM_POSITION_QUERY, PARAM_POSITION_BODY, PARAM_POSITION_HEADER, REDIS_OK
 };

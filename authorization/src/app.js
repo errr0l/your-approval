@@ -2,6 +2,8 @@ const Koa = require('koa');
 const bodyParser = require("koa-bodyparser");
 const views = require('koa-views');
 const _static = require("koa-static");
+const session = require('koa-session');
+// const cookies = require("koa-cookies");
 const path = require("path");
 
 const app = new Koa();
@@ -13,7 +15,15 @@ const testRouter = require("./controller/testController");
 const config = require("./config/appConfig");
 const errorHandler = require("./middleware/globalErrorHandler");
 
+app.keys = config.server.keys;
 app.use(bodyParser());
+app.use(session({
+    maxAge: 1000 * 60 * 30,
+    key: 'sessionid',
+    renew: true,
+    signed: false
+}, app));
+// app.use(cookies());
 app.use(views(path.join(__dirname, "./views"), {
     extension: 'ejs'
 }));
