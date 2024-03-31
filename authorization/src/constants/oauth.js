@@ -20,7 +20,9 @@ const errors = {
     INTERNAL_SERVER_ERROR: "internal_server_error",
     INVALID_CLIENT: "invalid_client",
     INVALID_REDIRECT_URI: "invalid_redirect_uri",
-    UNSUPPORTED_POSITION: "unsupported_position"
+    UNSUPPORTED_POSITION: "unsupported_position",
+    INVALID_TOKEN: "invalid_token",
+    SERVER_BUSY: "server_busy",
 };
 
 const grantTypes = {

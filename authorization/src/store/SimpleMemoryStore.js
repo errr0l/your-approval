@@ -1,18 +1,27 @@
+const { CustomException } = require("../exception");
+const { errors } = require("../constants/oauth");
+
 class SimpleMemoryStore {
     store = {};
     keys = [];
     ttl;
     timer;
+    limit;
 
     /**
      * 构造器
      * @param {Number} ttl 保存对象存活时间（单位，秒）
+     * @param {Number} limit 保存数量
      */
-    constructor(ttl) {
+    constructor(ttl, limit) {
         this.ttl = ttl;
+        this.limit = limit;
     }
 
     save(key, value) {
+        if (this.keys.length > this.limit) {
+            throw new CustomException({ message: errors.SERVER_BUSY });
+        }
         // 设置过期时间
         const expiresIn = Date.now() + this.ttl;
         this.store[key] = { value, expiresIn };

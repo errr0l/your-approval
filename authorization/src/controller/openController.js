@@ -1,5 +1,4 @@
 const Router = require('koa-router');
-const { v4: uuidV4 } = require("uuid");
 
 const { ACT_1, ACT_2, ID_TOKEN, REDIS_OK } = require("../constants/general");
 const { joinUrl } = require("../util/urlUtil");
@@ -10,7 +9,7 @@ const { patternsForAuthorize, patternsForApprove, patternsForToken, patternsForL
 const paramChecker = require("../middleware/paramChecker");
 const { OauthException, CustomException, ClientException } = require("../exception");
 const clientService = require("../service/clientService");
-const { decodeClientCredentials, getScopesFromBody } = require("../util/common");
+const { decodeClientCredentials, getScopesFromBody, generateUuid } = require("../util/common");
 const { codeStore, requestStore } = require("../store");
 const config = require("../config/appConfig");
 const userService = require("../service/userService");
@@ -24,6 +23,10 @@ router.get("/", async (ctx, next) => {
     ctx.body = "easyums oauth";
 });
 
+router.get("/userinfo", async (ctx) => {
+
+});
+
 // 登陆成功后，会记录在redis中（七天）；
 // 为防止使用过期缓存，在修改用户信息时，或许应该把缓存修改？先不管
 router.post("/login", paramChecker(patternsForLogin), async (ctx) => {
@@ -34,7 +37,7 @@ router.post("/login", paramChecker(patternsForLogin), async (ctx) => {
     }
     const user = await userService.login(username, password);
     ctx.session.user = user;
-    const sessionToken = uuidV4();
+    const sessionToken = generateUuid();
     const seconds = 60 * 60 * 24 * 7;
     const date = new Date();
     const milliseconds = seconds * 1000;
@@ -73,18 +76,20 @@ router.get("/authorize", paramChecker(patternsForAuthorize, (errors, ctx) => {
             redirectUrl: req.redirectUri
         });
     }
-    // 在session中获取user，如果已经过期时，从redis中获取
+    // 在session中获取user；
+    // 如果已经过期时，从redis中获取，并赋予session（相当于重新登陆）；
     let user = ctx.session.user;
     if (!user) {
         const sessionToken = ctx.cookies.get("session_token");
         if (sessionToken) {
-            const userStr = redisClient.get(sessionToken);
+            const userStr = await redisClient.get(sessionToken);
             if (userStr) {
                 user = JSON.parse(userStr);
+                ctx.session.user = user;
             }
         }
     }
-    const uuid = uuidV4();
+    const uuid = generateUuid();
     req.client = client;
     requestStore.save(uuid, req);
     const scopes = config.oauth.scopes;
@@ -113,7 +118,7 @@ router.post("/approve", paramChecker(patternsForApprove, null), async (ctx, next
     if (action === ACT_1) {
         // 授权码模式
         if (responseType === responseTypes.CODE) {
-            const code = uuidV4().replaceAll("-", "");
+            const code = generateUuid();
             queries['code'] = code;
             if (state) {
                 queries['state'] = state;
@@ -161,8 +166,9 @@ router.post("/token", paramChecker(patternsForToken, (errors, ctx) => {
 
     let respData;
     const scope = preReq.scopes.join(" "); // 将数组拆分为字符串
+    const tokenId = generateUuid();
     if (grantType === grantTypes.AUTHORIZATION_TYPE) {
-        const tokenPayload = { clientId, userId: user.id };
+        const tokenPayload = { clientId, userId: user.id, tokenId: tokenId };
         respData = {
             error: '',
             payload: {
@@ -187,6 +193,7 @@ router.post("/token", paramChecker(patternsForToken, (errors, ctx) => {
         // 保证每个用户仅有一个token记录
         await tokenService.delTokensByUserId(user.id);
         const tokenEntity = {
+            id: tokenId,
             accessToken: respData.payload.access_token,
             refreshToken: respData.payload.refresh_token,
             clientId, userId: user.id, scope: scope

@@ -37,9 +37,9 @@ async function delTokensByUserId(id) {
  * @returns {Promise<boolean>}
  */
 async function save(tokenEntity) {
-    const { userId, clientId, accessToken, refreshToken, scope } = tokenEntity;
-    const sql = "insert into `token` (`access_token`, `refresh_token`, `client_id`, `user_id`, `scope`) values (?, ?, ?, ?, ?)";
-    const [result] = await pool.query(sql, [accessToken, refreshToken, clientId, userId, scope]);
+    const { id, userId, clientId, accessToken, refreshToken, scope } = tokenEntity;
+    const sql = "insert into `token` (`id`, `access_token`, `refresh_token`, `client_id`, `user_id`, `scope`) values (?, ?, ?, ?, ?, ?)";
+    const [result] = await pool.query(sql, [id, accessToken, refreshToken, clientId, userId, scope]);
     return result.affectedRows === 1;
 }
 

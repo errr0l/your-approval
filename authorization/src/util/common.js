@@ -1,5 +1,6 @@
 const querystring = require('querystring');
 const crypto = require("crypto");
+const { v4: uuidV4 } = require("uuid");
 
 // 规定客户端秘钥进行编码后，在header的Authorization中传输；
 // 格式为Header.Authorization = Basic base64;
@@ -36,6 +37,14 @@ function getScopesFromBody(scopes) {
     return _scopes;
 }
 
+function generateUuid(withoutLine = true) {
+    let uuid = uuidV4();
+    if (withoutLine) {
+        uuid = uuid.replaceAll("-", "");
+    }
+    return uuid;
+}
+
 module.exports = {
-    decodeClientCredentials, encodeWithMd5, getScopesFromBody
+    decodeClientCredentials, encodeWithMd5, getScopesFromBody, generateUuid
 };

@@ -4,9 +4,9 @@
         <title>easyums - approve</title>
     </head>
     <body>
-        <h2>EASYUMS Authorization</h2>
         <div style="margin: 14px;">
             <% if (!user) { %>
+                <p>EASYUMS Authorization</p>
                 <form class="form" action="/oauth2/login" method="POST">
                     <input type="hidden" name="uuid" value="<%=uuid %>">
                     <p>
@@ -21,7 +21,7 @@
                     </p>
                 </form>
             <% } else { %>
-                <p><%=user.username%>，[<%=client.name %>]正在向您请求以下权限：</p>
+                <p>欢迎回来，<%=user.username%>，[<%=client.name %>]正在向您请求以下权限：</p>
                 <form class="form" action="/oauth2/approve" method="POST">
                     <input type="hidden" name="uuid" value="<%=uuid %>">
                     <ul>
