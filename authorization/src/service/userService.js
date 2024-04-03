@@ -23,6 +23,16 @@ async function selectByUsernameOrEmail(username, email) {
     return rows.length ? rows[0] : null;
 }
 
+async function getUserById(id) {
+    const sql = "select * from `user` where `id` = ?";
+    const [rows] = await pool.query(sql, [id]);
+    const user = rows.length ? rows[0] : null;
+    if (user) {
+        user.password = "";
+    }
+    return user;
+}
+
 // 注册账号；
 // 用户名和邮箱必须唯一
 async function register(user) {
@@ -45,5 +55,5 @@ async function register(user) {
 }
 
 module.exports = {
-    login, register
+    login, register, getUserById
 };

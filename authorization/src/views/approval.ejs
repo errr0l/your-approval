@@ -17,9 +17,9 @@
                     </p>
                     <p>
                         <button type="submit" class="btn btn-success" name="action" value="1">登陆</button>
-                        <button type="submit" class="btn btn-danger" name="action" value="2">返回</button>
                     </p>
                 </form>
+                <p style="font-size: 14px;">没有账号？<span id="btn-register" style="cursor: pointer; text-decoration: underline; color: blue;">注册</span></p>
             <% } else { %>
                 <p>欢迎回来，<%=user.username%>，[<%=client.name %>]正在向您请求以下权限：</p>
                 <form class="form" action="/oauth2/approve" method="POST">
@@ -44,5 +44,11 @@
                 </form>
             <% } %>
         </div>
+        <script>
+            const btnRegister = document.querySelector("#btn-register");
+            btnRegister.addEventListener('click', function () {
+                window.location.href = "/oauth2/register?" + window.location.search;
+            });
+        </script>
     </body>
 </html>

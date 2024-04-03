@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <title>easyums - approve</title>
+</head>
+<body>
+<div style="margin: 14px;">
+    <p>EASYUMS REGISTRATION</p>
+    <div>
+        <p>
+            <input type="text" name="username" placeholder="用户名" />
+        </p>
+        <p>
+            <textarea name="introduction" placeholder="简介" rows="2"></textarea>
+        </p>
+        <p>
+            <input type="password" name="password" placeholder="密码" />
+        </p>
+        <p>
+            <input type="password" name="password2" placeholder="确认密码" />
+        </p>
+        <p>
+            <input type="text" name="email" placeholder="邮箱" /> <button id="send-code" style="margin-left: 10px;">发送认证码</button>
+        </p>
+        <p>
+            <input type="text" name="code" placeholder="验证码" />
+        </p>
+        <p>
+            <button id="btn-register" class="btn btn-success" name="action" value="1">注册</button>
+        </p>
+        <p style="font-size: 14px;">
+            已有账号？
+            <span id="btn-login" style="cursor: pointer; text-decoration: underline; color: blue;">前往登陆</span>
+        </p>
+    </div>
+</div>
+<script>
+    const btnLogin = document.querySelector("#btn-login");
+    const iptEmail = document.querySelector("input[name='email']");
+    const emailRule = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(.[a-zA-Z0-9_-]+)+$/;
+    const btnSendCode = document.querySelector("#send-code");
+    const btnRegister = document.querySelector("#btn-register");
+
+    const iptUsername = document.querySelector("input[name='username']");
+    const iptPassword = document.querySelector("input[name='password']");
+    const iptPassword2 = document.querySelector("input[name='password2']");
+    const iptCode = document.querySelector("input[name='code']");
+    const iptIntroduction = document.querySelector("textarea[name='introduction']");
+
+    // 前往登陆
+    btnLogin.addEventListener('click', function () {
+        window.location.href = "/oauth2/authorize?" + window.location.search;
+    });
+    // 发送验证码
+    btnSendCode.addEventListener('click', function (e) {
+        e.preventDefault();
+        sendCode();
+    });
+    // 注册
+    btnRegister.addEventListener('click', function () {
+        request({
+            method: "POST", url: "/oauth2/register",
+            headers: { 'Content-Type': 'application/json' },
+            data: {
+                username: iptUsername.value,
+                email: iptEmail.value,
+                password: iptPassword.value,
+                password2: iptPassword2.value,
+                introduction: iptIntroduction.value,
+                code: iptCode.value
+            },
+            success(resp) {
+                console.log(resp);
+            },
+            error(resp) {
+                console.log(resp);
+            }
+        })
+    });
+
+    /**
+     * ajax请求工具
+     * @param {Object} opts
+     * @param {String} opts.method 请求方法
+     * @param {String} opts.url 请求路径
+     * @param {Object} opts.headers 请求头参数
+     * @param {Object} opts.data 请求参数
+     * @param {Function} opts.success 成功回调
+     * @param {Function} opts.error 失败回调
+     */
+    function request(opts) {
+        let { method, url, headers, data, success, error } = opts;
+        const xhr = new XMLHttpRequest();
+        xhr.open(method, url);
+        for (const key in headers) {
+            if (headers.hasOwnProperty(key)) {
+                xhr.setRequestHeader(key, headers[key]);
+            }
+        }
+        let _body = null;
+        if (data) {
+            _body = JSON.stringify(data);
+        }
+        xhr.send(_body);
+        xhr.onreadystatechange = function () {
+            if (xhr.readyState === 4 && xhr.status === 200) {
+                typeof success == 'function' && success(JSON.parse(xhr.responseText));
+            } else if (this.readyState === 4) {
+                typeof error == 'function' && error(JSON.parse(xhr.responseText));
+            }
+        }
+    }
+
+    function sendCode() {
+        const email = iptEmail.value;
+        if (!email) {
+            return window.alert("邮箱不能为空");
+        }
+        if (!emailRule.test(email)) {
+            return window.alert("邮箱格式不正确");
+        }
+        request({
+            method: 'POST', url: 'http://errol.shenzhuo.vip:26107/0/easyshop/portal/captcha/emailVerifyCode',
+            headers: { 'Content-Type': 'application/json' },
+            data: { email: email },
+            success(resp) {
+                if (resp.code === 0) {
+                    window.alert("发送成功");
+                }
+                else {
+                    window.alert("发送失败：" + resp.message);
+                }
+            },
+            error(error) {
+                console.log(error);
+                window.alert("发送失败");
+            }
+        });
+    }
+</script>
+</body>
+</html>

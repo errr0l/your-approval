@@ -16,6 +16,7 @@
         "jsonwebtoken": "^9.0.2",
         "koa": "^2.15.1",
         "koa-bodyparser": "^4.4.1",
+        "koa-compose": "^4.1.0",
         "koa-cookies": "^4.0.2",
         "koa-ejs": "^4.3.0",
         "koa-router": "^12.0.1",

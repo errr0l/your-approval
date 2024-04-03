@@ -23,6 +23,7 @@ const errors = {
     UNSUPPORTED_POSITION: "unsupported_position",
     INVALID_TOKEN: "invalid_token",
     SERVER_BUSY: "server_busy",
+    TOKEN_REQUIRED: "token_required",
 };
 
 const grantTypes = {

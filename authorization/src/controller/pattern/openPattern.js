@@ -5,6 +5,7 @@ const { responseTypes, grantTypes } = require("../../constants/oauth");
 const { ACT_1, ACT_2 } = require("../../constants/general");
 // const { decodeClientCredentials } = require("../../util/common");
 const config = require("../../config/appConfig");
+const emailRule = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(.[a-zA-Z0-9_-]+)+$/;
 
 // 当然，不以这种方式来校验也是可以的，只是说使用这种校验形式可以使得业务代码更集中;
 // 重新考虑了一下，虽然js可以轻易做到在任何地方做校验，但其他语言可能不行，所以有些校验应该放在业务层，这里只校验一些静态规则；
@@ -89,18 +90,6 @@ const patternsForApprove = [{
     rules: [{
         name: "uuid",
         required: true,
-        // validator(value, _this, ctx) {
-        //     let errors = [];
-        //     if (!value) {
-        //         errors.push(this.name + "不能为空");
-        //     }
-        //     else {
-        //         if (!checkRequest(value)) {
-        //             errors.push(this.name + "不存在");
-        //         }
-        //     }
-        //     return errors;
-        // }
     }, {
         name: "action",
         validator(value, _this, ctx) {
@@ -140,85 +129,18 @@ const patternsForToken = [{
     }, {
         name: "code",
         required: true,
-        // validator(value, _this, ctx) {
-        //     const errors = [];
-        //     if (!value) {
-        //         errors.push(this.name + "不能为空");
-        //     }
-        //     else {
-        //         const preRequest = getRequest(value, false);
-        //         if (preRequest == null) {
-        //             errors.push("未知的" + this.name);
-        //         }
-        //         else {
-        //             ctx.request.client = preRequest.client;
-        //         }
-        //     }
-        //     return errors;
-        // }
     }, {
         name: "redirect_uri",
         required: true,
-        // validator(value, _this, ctx) {
-        //     let errors = [];
-        //     if (!value) {
-        //         errors.push(this.name + "不能为空");
-        //     }
-        //     else {
-        //         const client = ctx.request.client;
-        //         if (client) {
-        //             if (!client.redirect_uris.includes(value)) {
-        //                 errors.push("不匹配的" + this.name);
-        //             }
-        //         }
-        //     }
-        //     if (errors.length) {
-        //         throw new Error(errors.join(";"));
-        //     }
-        // }
     }, {
         name: "client_id",
         required: true,
-        // validator(value, _this, ctx) {
-        //     let errors = [];
-        //     if (!value) {
-        //         errors.push(this.name + "不能为空");
-        //     }
-        //     else {
-        //         value = +value;
-        //         const client = ctx.request.client;
-        //         if (client) {
-        //             if (client.id !== value) {
-        //                 errors.push("不匹配的" + this.name);
-        //             }
-        //         }
-        //     }
-        //     if (errors.length) {
-        //         throw new Error(errors.join(";"));
-        //     }
-        // }
     }]
 }, {
     position: "header",
     rules: [{
         name: "authorization",
         required: true,
-        // validator(value, _this, ctx) {
-        //     let errors = [];
-        //     if (!value) {
-        //         errors.push(this.name + "不能为空");
-        //     }
-        //     else {
-        //         const { secret } = decodeClientCredentials(value);
-        //         const client = ctx.request.client;
-        //         if (client && client.secret !== secret) {
-        //             errors.push("客户端验证失败");
-        //         }
-        //     }
-        //     if (errors.length) {
-        //         throw new Error(errors.join(";"));
-        //     }
-        // }
     }]
 }];
 
@@ -236,6 +158,61 @@ const patternsForLogin = [{
     }]
 }];
 
+const patternsForRegister = [{
+    position: "body",
+    rules: [{
+        name: "username",
+        required: true,
+    }]
+}, {
+    position: "body",
+    rules: [{
+        name: "password",
+        required: true,
+    }]
+}, {
+    position: "body",
+    rules: [{
+        name: "password2",
+        validator(value, _this, ctx) {
+            const errors = [];
+            if (!value) {
+                errors.push(this.name + "不能为空");
+            }
+            else {
+                if (value !== ctx.request.body.password) {
+                    errors.push("输入密码不一致");
+                }
+            }
+            return errors;
+        }
+    }]
+}, {
+    position: "body",
+    rules: [{
+        name: "email",
+        required: true,
+        validator(value, _this, ctx) {
+            const errors = [];
+            if (!value) {
+                errors.push(this.name + "不能为空");
+            }
+            else {
+                if (!emailRule.test(value)) {
+                    errors.push("邮箱格式不正确");
+                }
+            }
+            return errors;
+        }
+    }]
+}, {
+    position: "body",
+    rules: [{
+        name: "code",
+        required: true
+    }]
+}];
+
 module.exports = {
-    patternsForAuthorize, patternsForApprove, patternsForToken, patternsForLogin
+    patternsForAuthorize, patternsForApprove, patternsForToken, patternsForLogin, patternsForRegister
 }

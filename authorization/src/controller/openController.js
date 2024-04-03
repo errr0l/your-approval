@@ -1,11 +1,12 @@
 const Router = require('koa-router');
+const compose = require("koa-compose");
 
-const { ACT_1, ACT_2, ID_TOKEN, REDIS_OK } = require("../constants/general");
+const { ACT_1, ACT_2, ID_TOKEN, REDIS_OK, EASYSHOP_REDIS_PREFIX } = require("../constants/general");
 const { joinUrl } = require("../util/urlUtil");
 const tokenService = require("../service/tokenService");
 const tokenUtil = require("../util/tokenUtil");
 const { errors: oauthErrors, grantTypes, responseTypes } = require("../constants/oauth");
-const { patternsForAuthorize, patternsForApprove, patternsForToken, patternsForLogin } = require("./pattern/openPattern");
+const { patternsForAuthorize, patternsForApprove, patternsForToken, patternsForLogin, patternsForRegister } = require("./pattern/openPattern");
 const paramChecker = require("../middleware/paramChecker");
 const { OauthException, CustomException, ClientException } = require("../exception");
 const clientService = require("../service/clientService");
@@ -14,6 +15,9 @@ const { codeStore, requestStore } = require("../store");
 const config = require("../config/appConfig");
 const userService = require("../service/userService");
 const { client: redisClient } = require("../config/redisHelper");
+const tokenChecker = require("../middleware/tokenChecker");
+const permissionChecker = require("../middleware/permissionChecker");
+const { buildUserinfo } = require("../util/oidcUtil");
 
 const router = new Router({
     prefix: "/oauth2"
@@ -23,8 +27,31 @@ router.get("/", async (ctx, next) => {
     ctx.body = "easyums oauth";
 });
 
-router.get("/userinfo", async (ctx) => {
+router.get("/register", async (ctx) => {
+    await ctx.render("register");
+});
 
+router.post("/register", paramChecker(patternsForRegister), async (ctx) => {
+    ctx.body = { error: '', error_description: '' };
+    const formData = ctx.request.body;
+    console.log(EASYSHOP_REDIS_PREFIX + formData.email);
+    const _code = await redisClient.get(EASYSHOP_REDIS_PREFIX + formData.email);
+    if (_code !== formData.code) {
+        throw new ClientException({ message: '验证码不正确或已失效' });
+    }
+    if (await userService.register(formData)) {
+        ctx.body = { error: '', message: '注册成功' };
+    }
+});
+
+// userinfo接口按照分类，是属于资源服务器的
+router.get("/userinfo", compose([tokenChecker(), permissionChecker('openid')]), async (ctx) => {
+    const userId = ctx.request.decoded.userId;
+    const user = userService.getUserById(userId);
+    ctx.body = {
+        error: '',
+        payload: buildUserinfo(ctx.request.scopes, user)
+    };
 });
 
 // 登陆成功后，会记录在redis中（七天）；
@@ -181,9 +208,8 @@ router.post("/token", paramChecker(patternsForToken, (errors, ctx) => {
         // 在校验时添加的属性
         if (preReq._containedOpenid) {
             const idTokenPayload = {
-                sub: user.id,
                 aud: clientId,
-                user
+                ...buildUserinfo(preReq.scopes, user)
             };
             respData.payload[ID_TOKEN] = tokenUtil.generateIdToken(idTokenPayload);
         }
