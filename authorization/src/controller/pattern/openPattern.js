@@ -5,6 +5,7 @@ const { responseTypes, grantTypes } = require("../../constants/oauth");
 const { ACT_1, ACT_2 } = require("../../constants/general");
 // const { decodeClientCredentials } = require("../../util/common");
 const config = require("../../config/appConfig");
+const { openidRule } = require("../../util/oidcUtil");
 const emailRule = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(.[a-zA-Z0-9_-]+)+$/;
 
 // 当然，不以这种方式来校验也是可以的，只是说使用这种校验形式可以使得业务代码更集中;
@@ -74,11 +75,11 @@ const patternsForAuthorize = [{
                 }
 
                 // 如果使用了oidc，则必须包含openid
-                if (/(profile|email|phone|address)/.test(value) && !containedOpenid) {
+                if (openidRule.test(value) && !containedOpenid) {
                     errors.push("缺少openid权限范围");
                 }
                 ctx.request._scopes = _scopes; // 申请的权限
-                ctx.request._containedOpenid = containedOpenid;
+                ctx.request._containedOpenid = containedOpenid; // 这个值只能说明客户端申请的时候，有openid；用户可以不授权，比如，openidRule一个都不选
             }
             return errors;
         }

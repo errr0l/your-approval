@@ -36,21 +36,20 @@
 </div>
 <script>
     const btnLogin = document.querySelector("#btn-login");
-    const iptEmail = document.querySelector("input[name='email']");
     const emailRule = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(.[a-zA-Z0-9_-]+)+$/;
     const btnSendCode = document.querySelector("#send-code");
     const btnRegister = document.querySelector("#btn-register");
 
+    const iptEmail = document.querySelector("input[name='email']");
     const iptUsername = document.querySelector("input[name='username']");
     const iptPassword = document.querySelector("input[name='password']");
     const iptPassword2 = document.querySelector("input[name='password2']");
     const iptCode = document.querySelector("input[name='code']");
     const iptIntroduction = document.querySelector("textarea[name='introduction']");
+    const inputs = [iptEmail, iptUsername, iptPassword, iptPassword2, iptCode, iptIntroduction];
 
     // 前往登陆
-    btnLogin.addEventListener('click', function () {
-        window.location.href = "/oauth2/authorize?" + window.location.search;
-    });
+    btnLogin.addEventListener('click', toAuthorize);
     // 发送验证码
     btnSendCode.addEventListener('click', function (e) {
         e.preventDefault();
@@ -70,13 +69,33 @@
                 code: iptCode.value
             },
             success(resp) {
-                console.log(resp);
+                if (!resp.error) {
+                    reset(inputs);
+                    const act = window.confirm("注册成功，是否前往登陆？");
+                    if (act) {
+                        toAuthorize();
+                    }
+                }
+                else {
+                    window.alert("注册失败");
+                }
             },
             error(resp) {
                 console.log(resp);
+                window.alert("注册失败");
             }
         })
     });
+
+    function toAuthorize() {
+        window.location.href = "/oauth2/authorize" + window.location.search;
+    }
+
+    function reset(forms) {
+        for (const form of forms) {
+            form.value = "";
+        }
+    }
 
     /**
      * ajax请求工具
@@ -84,7 +103,7 @@
      * @param {String} opts.method 请求方法
      * @param {String} opts.url 请求路径
      * @param {Object} opts.headers 请求头参数
-     * @param {Object} opts.data 请求参数
+     * @param {Object} opts.data 请求参数[body]
      * @param {Function} opts.success 成功回调
      * @param {Function} opts.error 失败回调
      */
@@ -103,10 +122,13 @@
         }
         xhr.send(_body);
         xhr.onreadystatechange = function () {
-            if (xhr.readyState === 4 && xhr.status === 200) {
-                typeof success == 'function' && success(JSON.parse(xhr.responseText));
-            } else if (this.readyState === 4) {
-                typeof error == 'function' && error(JSON.parse(xhr.responseText));
+            if (xhr.readyState === 4) {
+                if (xhr.status === 200) {
+                    typeof success == 'function' && success(JSON.parse(xhr.responseText));
+                }
+                else {
+                    typeof error == 'function' && error(JSON.parse(xhr.responseText));
+                }
             }
         }
     }

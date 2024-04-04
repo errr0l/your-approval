@@ -1,5 +1,6 @@
 // 令牌服务（对应token表）
 const { pool } = require("../config/DBHelper");
+const { client } = require("../config/redisHelper");
 
 /**
  * 获取token
@@ -26,9 +27,16 @@ async function getTokensByUserId(id) {
 async function delTokensByUserId(id) {
     const rows = await getTokensByUserId(id);
     if (rows.length) {
-        const sql = "delete from `token` where `id` in (?)";
-        await pool.query(sql, [rows.map(item => item.id)]);
+        // const sql = "delete from `token` where `id` = (?)";
+        // const id = rows[0].id;
+        // await pool.query(sql, [id]);
+        await delToken(rows[0]);
     }
+}
+
+async function delToken(token) {
+    const sql = "delete from `token` where `id` = ?";
+    await pool.query(sql, [token.id]);
 }
 
 /**
@@ -44,5 +52,5 @@ async function save(tokenEntity) {
 }
 
 module.exports = {
-    getTokenById, getTokensByUserId, save, delTokensByUserId
+    getTokenById, getTokensByUserId, save, delTokensByUserId, delToken
 }

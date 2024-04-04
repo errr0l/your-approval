@@ -36,7 +36,7 @@ async function getUserById(id) {
 // 注册账号；
 // 用户名和邮箱必须唯一
 async function register(user) {
-    const { username, password, email } = user;
+    const { username, password, email, introduction } = user;
     const _user = await selectByUsernameOrEmail(username, email);
     if (_user) {
         if (_user.username === username) {
@@ -50,7 +50,7 @@ async function register(user) {
     const sql = "insert into `user` (`username`, `password`, `avatar`, `created_at`, `email`, `state`, `introduction`) values (?, ?, ?, ?, ?, ?, ?)";
 
     const defaultState = 1;
-    const [result] = await pool.query(sql, [username, encodeWithMd5(password), "", date, email, defaultState, ""]);
+    const [result] = await pool.query(sql, [username, encodeWithMd5(password), "", date, email, defaultState, introduction]);
     return result.affectedRows === 1;
 }
 

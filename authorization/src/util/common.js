@@ -2,6 +2,8 @@ const querystring = require('querystring');
 const crypto = require("crypto");
 const { v4: uuidV4 } = require("uuid");
 
+const { openidRule } = require("../util/oidcUtil");
+
 // 规定客户端秘钥进行编码后，在header的Authorization中传输；
 // 格式为Header.Authorization = Basic base64;
 function decodeClientCredentials(authorization) {
@@ -29,10 +31,26 @@ function encodeWithMd5(str) {
 function getScopesFromBody(scopes) {
     const _scopes = [];
     const prefix = "scope_";
+    let _openid;
+    let shouldAdding = false;
     for (const key in scopes) {
         if (key.startsWith(prefix)) {
-            _scopes.push(key.replace(prefix, ""));
+            let _scope = key.replace(prefix, "");
+            // _scopes.push(key.replace(prefix, ""));
+            if (_scope === 'openid') {
+                _openid = _scope;
+            }
+            else {
+                _scopes.push(_scope);
+            }
+            // 判断用户是否授权了openid（即，授权了openidRule任意中的一个，openid会被自动授权）
+            if (!shouldAdding && openidRule.test(_scope)) {
+                shouldAdding = true;
+            }
         }
+    }
+    if (shouldAdding) {
+        _scopes.unshift(_openid);
     }
     return _scopes;
 }

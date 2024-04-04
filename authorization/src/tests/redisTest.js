@@ -9,10 +9,10 @@ const { client } = require("../config/redisHelper");
 // });
 
 (async () => {
-    // const resp = await client.set("sessionid", "123", "EX", 60);
-    // console.log(resp);
+    const resp = await client.get("sessionid");
+    console.log(resp);
 
-    const r = await client.exists(["ca8d1ca05a168f", "b"]);
-    console.log(r);
+    // const r = await client.exists(["ca8d1ca05a168f", "b"]);
+    // console.log(r);
 })();
 

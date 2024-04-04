@@ -20,7 +20,6 @@ function tokenChecker(opts = {}) {
         const prefix = BEARER;
         let value;
         if (position === PARAM_POSITION_HEADER) {
-            console.log(ctx.request.headers);
             value = ctx.request.headers[name];
         }
 
@@ -39,16 +38,16 @@ function tokenChecker(opts = {}) {
         }
         ctx.request.tokenDecoded = decoded;
         const tokenId = decoded.tokenId;
-
         // 先在redis中判断，如果不存在则继续查询mysql
-        if ((await redisClient.exists(tokenId)) === REDIS_0) {
-            const token = await tokenService.getTokenById(decoded.tokenId);
-            if (!token) {
+        let _token;
+        if (!(_token = await redisClient.get(tokenId))) {
+            _token = await tokenService.getTokenById(decoded.tokenId);
+            if (!_token) {
                 throw new ClientException({ code: oauthErrors.INVALID_TOKEN });
             }
             // 重新记录在redis中；
             // 重新颁发令牌时，需要把该记录删除，否则可能会出现误判；
-            redisClient.set(tokenId, "1", "EX", decoded.exp).then(res => {
+            redisClient.set(tokenId, JSON.stringify(_token), "EX", decoded.exp).then(res => {
                 if (res === REDIS_OK) {
                     console.log("redis 保存成功：token_id = %s", tokenId);
                 }
@@ -57,6 +56,11 @@ function tokenChecker(opts = {}) {
                 }
             });
         }
+        else {
+            // 将json字符串转为token对象
+            _token = JSON.parse(_token);
+        }
+        ctx.request.token = _token;
         await next();
     }
 }

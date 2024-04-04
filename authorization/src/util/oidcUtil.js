@@ -1,15 +1,21 @@
 // 各权限范围对应的字段
-const profileFields = ['name', 'avatar', 'nickname', 'preferred_username', 'introduction', 'picture', 'website', 'gender', 'birthdate', 'zoneinfo', 'locale', 'created_at'];
+const profileFields = ['username', 'avatar', 'nickname', 'preferred_username', 'introduction', 'picture', 'website', 'gender', 'birthdate', 'zoneinfo', 'locale', 'created_at'];
 const emailFields = ['email', 'email_verified'];
 const phoneFields = ['phone', 'phone_verified'];
 const openidFields = ['id'];
 const addressFields = ['address'];
 
+// 权限范围包含其中的一个，则自动添加openid权限范围
+const openidRule = /(profile|email|phone|address)/;
+
 function setValues(userinfo, fields, user) {
     for (const key of fields) {
-        const value = user[key];
-        if (value) {
-            userinfo[key] = value;
+        // const value = user[key];
+        // if (value) {
+        //     userinfo[key] = value;
+        // }
+        if (key in user) {
+            userinfo[key] = user[key];
         }
     }
 }
@@ -42,5 +48,5 @@ function buildUserinfo(scopes, user) {
 }
 
 module.exports = {
-    buildUserinfo
+    buildUserinfo, openidRule
 }

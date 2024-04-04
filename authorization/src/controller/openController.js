@@ -32,22 +32,23 @@ router.get("/register", async (ctx) => {
 });
 
 router.post("/register", paramChecker(patternsForRegister), async (ctx) => {
-    ctx.body = { error: '', error_description: '' };
     const formData = ctx.request.body;
-    console.log(EASYSHOP_REDIS_PREFIX + formData.email);
-    const _code = await redisClient.get(EASYSHOP_REDIS_PREFIX + formData.email);
+    const _code = await redisClient.getdel(EASYSHOP_REDIS_PREFIX + formData.email);
     if (_code !== formData.code) {
         throw new ClientException({ message: '验证码不正确或已失效' });
     }
     if (await userService.register(formData)) {
         ctx.body = { error: '', message: '注册成功' };
     }
+    else {
+        throw new CustomException();
+    }
 });
 
 // userinfo接口按照分类，是属于资源服务器的
 router.get("/userinfo", compose([tokenChecker(), permissionChecker('openid')]), async (ctx) => {
-    const userId = ctx.request.decoded.userId;
-    const user = userService.getUserById(userId);
+    const userId = ctx.request.tokenDecoded.userId;
+    const user = await userService.getUserById(userId);
     ctx.body = {
         error: '',
         payload: buildUserinfo(ctx.request.scopes, user)
@@ -217,7 +218,18 @@ router.post("/token", paramChecker(patternsForToken, (errors, ctx) => {
 
     try {
         // 保证每个用户仅有一个token记录
-        await tokenService.delTokensByUserId(user.id);
+        const tokens = await tokenService.getTokensByUserId(user.id);
+        if (tokens.length) {
+            console.log("删除数据库中的token：");
+            const _token = tokens[0];
+            Promise.all([tokenService.delToken(_token), redisClient.del(_token.id)])
+                .then(results => {
+                    console.log(results);
+                })
+                .catch(error => {
+                    console.log(error);
+                });
+        }
         const tokenEntity = {
             id: tokenId,
             accessToken: respData.payload.access_token,
