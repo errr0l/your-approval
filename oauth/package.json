@@ -1,0 +1,23 @@
+{
+    "name": "easyums-oauth",
+    "version": "1.0.0",
+    "description": "简易的用户管理系统，基于oauth2构建，主要用于不同系统之间的用户信息共享。",
+    "main": "",
+    "scripts": {
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "author": "",
+    "license": "ISC",
+    "dependencies": {
+        "axios": "^1.6.8",
+        "koa": "^2.15.1",
+        "koa-bodyparser": "^4.4.1",
+        "koa-compose": "^4.1.0",
+        "koa-cookies": "^4.0.2",
+        "koa-ejs": "^4.3.0",
+        "koa-router": "^12.0.1",
+        "koa-session": "^6.4.0",
+        "koa-static": "^5.0.0",
+        "koa-views": "^8.1.0"
+    }
+}

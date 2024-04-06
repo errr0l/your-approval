@@ -6,9 +6,9 @@ yarn-debug.log*
 yarn-error.log*
 package-lock.json
 tests/**/coverage
-authorization/secrets/miniprogram-config.ini
-authorization/**/*.pem
-authorization/app.ini
+oauth/secrets/miniprogram-config.ini
+*.pem
+app.ini
 
 # Editor directories and files
 .idea
