@@ -1,5 +1,6 @@
 const querystring = require('querystring');
 const crypto = require("crypto");
+const os = require("os");
 const { v4: uuidV4 } = require("uuid");
 
 const { openidRule } = require("../util/oidcUtil");
@@ -60,6 +61,25 @@ function generateUuid(withoutLine = true) {
     return uuid;
 }
 
+function getIp() {
+    const networkInterfaces = os.networkInterfaces();
+    let ipAddress;
+
+    // 遍历网络接口
+    Object.keys(networkInterfaces).forEach(interfaceName => {
+        const networkInterface = networkInterfaces[interfaceName];
+
+        // 遍历具体网络接口的IP地址
+        networkInterface.forEach(address => {
+            // 排除IPv6地址和回环地址
+            if (address.family === 'IPv4' && !address.internal) {
+                ipAddress = address.address;
+            }
+        });
+    });
+    return ipAddress;
+}
+
 module.exports = {
-    decodeClientCredentials, encodeWithMd5, getScopesFromBody, generateUuid
+    decodeClientCredentials, encodeWithMd5, getScopesFromBody, generateUuid, getIp
 };

@@ -1,54 +1,74 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <title>easyums - approve</title>
-    </head>
-    <body>
-        <div style="margin: 14px;">
-            <% if (!user) { %>
-                <p>EASYUMS Authorization</p>
-                <form class="form" action="/oauth2/login" method="POST">
-                    <input type="hidden" name="uuid" value="<%=uuid %>">
-                    <p>
-                        <input type="text" name="username" placeholder="用户名/邮箱" />
-                    </p>
-                    <p>
-                        <input type="password" name="password" placeholder="密码" />
-                    </p>
-                    <p>
-                        <button type="submit" class="btn btn-success" name="action" value="1">登陆</button>
-                    </p>
-                </form>
-                <p style="font-size: 14px;">没有账号？<span id="btn-register" style="cursor: pointer; text-decoration: underline; color: blue;">注册</span></p>
-            <% } else { %>
-                <p>欢迎回来，<%=user.username%>，[<%=client.name %>]正在向您请求以下权限：</p>
-                <form class="form" action="/oauth2/approve" method="POST">
-                    <input type="hidden" name="uuid" value="<%=uuid %>">
-                    <ul>
-                        <% askedScopes.forEach(function (item) { %>
-                            <% var openid = item === 'openid'; %>
-                            <% if (openid) { %>
-                            <li style="display: none;">
-                                <input id="scope_<%=item%>" name="scope_<%=item%>" checked type="checkbox" />
-                            </li>
-                            <% } else { %>
-                            <li>
-                                <input id="scope_<%=item%>" name="scope_<%=item%>" checked type="checkbox" />
-                                <span><%=scopes[item]%></span>
-                            </li>
-                            <% } %>
-                        <% }) %>
-                    </ul>
-                    <button type="submit" class="btn btn-success" name="action" value="1">同意</button>
-                    <button type="submit" class="btn btn-danger" name="action" value="2">拒绝</button>
-                </form>
-            <% } %>
-        </div>
-        <script>
-            const btnRegister = document.querySelector("#btn-register");
-            btnRegister.addEventListener('click', function () {
-                window.location.href = "/oauth2/register" + window.location.search;
-            });
-        </script>
-    </body>
+<head>
+    <title>easyums - approval</title>
+    <link rel="stylesheet" href="/css/layout1.css" />
+</head>
+<body>
+<div class="container">
+    <div class="title">EASYUMS APPROVAL</div>
+    <div>
+        <% if (!user) { %>
+        <form class="form" action="/oauth2/login" method="POST">
+            <input type="hidden" name="uuid" value="<%=uuid %>">
+            <p>
+                <label>
+                    <span class="name">账号：</span>
+                    <input type="text" name="username" placeholder="请输入用户名/邮箱" />
+                </label>
+            </p>
+            <p>
+                <label>
+                    <span class="name">密码：</span>
+                    <input type="password" name="password" placeholder="请输入" />
+                </label>
+            </p>
+            <p>
+                <span class="packing1"></span>
+                <button type="submit" class="btn btn-success" name="action" value="1">登陆</button>
+            </p>
+        </form>
+        <p style="font-size: 14px; text-align: right; margin-bottom: 10px;">没有账号？<span id="btn-register" style="cursor: pointer; text-decoration: underline; color: blue;">注册</span></p>
+        <% } else { %>
+        <p><%=user.username%>，</p>
+        <p>[<%=client.name %>]正在向您请求以下权限：</p>
+        <form class="form" action="/oauth2/approve" method="POST">
+            <input type="hidden" name="uuid" value="<%=uuid %>">
+            <ul>
+                <% askedScopes.forEach(function (item) { %>
+                    <% var openid = item === 'openid'; %>
+                    <% if (openid) { %>
+                    <li style="display: none;">
+                        <label>
+                            <input id="scope_<%=item%>" name="scope_<%=item%>" checked type="checkbox" />
+                        </label>
+                    </li>
+                    <% } else { %>
+                    <li>
+                        <label>
+                            <input id="scope_<%=item%>" name="scope_<%=item%>" checked type="checkbox" />
+                            <span><%=scopes[item]%></span>
+                        </label>
+                    </li>
+                    <% } %>
+                <% }) %>
+            </ul>
+            <p style="margin-bottom: 10px;">
+                <span class="packing2"></span>
+                <button type="submit" class="act1" name="action" value="1">同意</button>
+                <button type="submit" class="act2" name="action" value="2">拒绝</button>
+            </p>
+        </form>
+        <% } %>
+    </div>
+</div>
+<script>
+    const btnRegister = document.querySelector("#btn-register");
+    if (btnRegister) {
+        btnRegister.addEventListener('click', function () {
+            window.location.href = "/oauth2/register" + window.location.search;
+        });
+    }
+</script>
+</body>
 </html>

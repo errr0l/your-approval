@@ -16,6 +16,7 @@ const testRouter = require("./controller/testController");
 
 const config = require("./config/appConfig");
 const errorHandler = require("../../common/src/middleware/globalErrorHandler");
+const { getIp } = require("../../common/src/util/common");
 
 app.keys = config.server.keys;
 app.use(bodyParser());
@@ -43,5 +44,8 @@ const server = app.listen(config.server.port, function () {
     if (host === "::") {
         host = "localhost";
     }
-    console.log('The Server is listening at http://%s:%s', host, port);
+    const ip = getIp();
+    console.log("App running at：");
+    console.log("- http://%s:%s", host, port);
+    console.log('- http://%s:%s', ip, port);
 });

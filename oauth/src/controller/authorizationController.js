@@ -69,15 +69,18 @@ router.post("/login", paramChecker(patternsForLogin), async (ctx) => {
     ctx.redirect(joinUrl("/oauth2/authorize", query));
 });
 
-router.get("/authorize", paramChecker(patternsForAuthorize, (errors, ctx) => {
-    if (ctx.request.query.redirect_uri) {
-        // 如果是当前请求，会自动解码
-        // redirectUri = decodeURIComponent(redirectUri);
-        throw new OauthException({
-            code: oauthErrors.INVALID_REQUEST, message: errors.join(";"),
-            redirectUrl: decodeURIComponent(ctx.request.query.redirect_uri)
-        });
-    }
+router.get("/authorize", paramChecker(patternsForAuthorize, {
+    errorHandler: (errors, ctx) => {
+        if (ctx.request.query.redirect_uri) {
+            // 如果是当前请求，会自动解码
+            // redirectUri = decodeURIComponent(redirectUri);
+            throw new OauthException({
+                code: oauthErrors.INVALID_REQUEST, message: errors.join(";"),
+                redirectUrl: decodeURIComponent(ctx.request.query.redirect_uri)
+            });
+        }
+    },
+    errorCode: oauthErrors.INVALID_REQUEST
 }), async (ctx, next) => {
     const req = ctx.request;
     const { client_id: clientId, redirect_uri: redirectUri, scope } = req.query;
@@ -117,7 +120,7 @@ router.get("/authorize", paramChecker(patternsForAuthorize, (errors, ctx) => {
 
 // 授权；
 // 用户可在授权页面上进行操作；
-router.post("/approve", paramChecker(patternsForApprove, null), async (ctx, next) => {
+router.post("/approve", paramChecker(patternsForApprove), async (ctx, next) => {
     const { action, uuid, ...scopes } = ctx.request.body;
     const _scopes = getScopesFromBody(scopes); // 即真正授权范围
     const preReq = requestStore.get(uuid);
@@ -154,8 +157,11 @@ router.post("/approve", paramChecker(patternsForApprove, null), async (ctx, next
 });
 
 // 兑换token；
-router.post("/token", paramChecker(patternsForToken, (errors, ctx) => {
-    throw new ClientException({ message: errors.join(";") });
+router.post("/token", paramChecker(patternsForToken, {
+    errorHandler: (errors, ctx) => {
+        throw new ClientException({ code: oauthErrors.INVALID_REQUEST, message: errors.join(";") });
+    },
+    errorCode: oauthErrors.INVALID_REQUEST
 }), async (ctx, next) => {
     const req = ctx.request;
     let { grant_type: grantType, code, client_id: clientId, redirect_uri: redirectUri } = req.body
@@ -195,8 +201,8 @@ router.post("/token", paramChecker(patternsForToken, (errors, ctx) => {
         // 在校验时添加的属性
         if (preReq._containedOpenid) {
             const idTokenPayload = {
-                aud: clientId,
-                sub: encodeWithMd5(clientId + "@" + user.id),
+                client_id: clientId,
+                openid: encodeWithMd5(clientId + "@" + user.id),
                 userinfo: buildUserinfo(preReq.scopes, user)
             };
             respData.payload[ID_TOKEN] = tokenUtil.generateIdToken(idTokenPayload);

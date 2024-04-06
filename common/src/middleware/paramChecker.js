@@ -6,11 +6,14 @@ const { ClientException } = require("../exception/index");
 /**
  * 参数校验中间件
  * @param {Array<{ position: String, rules: Array<{ name: String, required: Boolean, validator: Function }> }>} patterns 校验规则
- * @param {Function} errorHandler 错误处理；可以选择自己实现错误处理的规则；
+ * @param {Object} opts
+ * @param opts.errorHandler 错误处理；可以选择自己实现错误处理的规则；
+ * @param opts.errorCode 错误码
  * @returns {(function(*, *))|*}
  */
-function paramChecker(patterns, errorHandler = null) {
+function paramChecker(patterns, opts= {}) {
     return async function (ctx, next) {
+        const { errorHandler, errorCode = "" } = opts;
         const query = ctx.request.query;
         const body = ctx.request.body;
         let headers;
@@ -33,7 +36,7 @@ function paramChecker(patterns, errorHandler = null) {
                     value = headers[name];
                 }
                 else {
-                    throw new ClientException({ message: UNSUPPORTED_POSITION });
+                    throw new ClientException({ code: errorCode, message: UNSUPPORTED_POSITION });
                 }
                 if (required) {
                     if (typeof value == 'string') {
@@ -64,7 +67,7 @@ function paramChecker(patterns, errorHandler = null) {
             if (errorHandler && typeof errorHandler == 'function') {
                 errorHandler(errors, ctx);
             }
-            throw new ClientException({ message: errors.join(";") });
+            throw new ClientException({ code: errorCode, message: errors.join(";") });
         }
         // don't forget to call next() with 'await`, or else a 404 error will be caused;
         await next();

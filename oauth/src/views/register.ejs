@@ -2,33 +2,54 @@
 <html lang="en">
 <head>
     <title>easyums - approve</title>
+    <link rel="stylesheet" href="/css/layout1.css" />
 </head>
 <body>
-<div style="margin: 14px;">
-    <p>EASYUMS REGISTRATION</p>
+<div class="container">
+    <div class="title">EASYUMS REGISTRATION</div>
     <div>
         <p>
-            <input type="text" name="username" placeholder="用户名" />
+            <label>
+                <span class="name">用户名：</span>
+                <input type="text" name="username" placeholder="请输入" />
+            </label>
         </p>
         <p>
-            <textarea name="introduction" placeholder="简介" rows="2"></textarea>
+            <label>
+                <span class="name">密码：</span>
+                <input type="password" name="password" placeholder="请输入" />
+            </label>
         </p>
         <p>
-            <input type="password" name="password" placeholder="密码" />
+            <label>
+                <span class="name">确认密码：</span>
+                <input type="password" name="password2" placeholder="请输入" />
+            </label>
         </p>
         <p>
-            <input type="password" name="password2" placeholder="确认密码" />
+            <label>
+                <span class="name">简介：</span>
+                <textarea name="introduction" placeholder="请输入" rows="2"></textarea>
+            </label>
         </p>
         <p>
-            <input type="text" name="email" placeholder="邮箱" /> <button id="send-code" style="margin-left: 10px;">发送认证码</button>
+            <label>
+                <span class="name">邮箱：</span>
+                <input type="text" name="email" placeholder="请输入" />
+            </label>
+            <button id="send-code" style="margin-left: 10px;">发送认证码</button>
         </p>
         <p>
-            <input type="text" name="code" placeholder="验证码" />
+            <label>
+                <span class="name">验证码：</span>
+                <input type="text" name="code" placeholder="请输入" />
+            </label>
         </p>
         <p>
+            <span class="packing1"></span>
             <button id="btn-register" class="btn btn-success" name="action" value="1">注册</button>
         </p>
-        <p style="font-size: 14px;">
+        <p style="font-size: 14px; text-align: right;">
             已有账号？
             <span id="btn-login" style="cursor: pointer; text-decoration: underline; color: blue;">前往登陆</span>
         </p>

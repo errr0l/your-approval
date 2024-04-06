@@ -1,4 +1,4 @@
-const { CODE_500, CODE_400, CODE_200 } = require("../constants/general");
+const { CODE_500, CODE_400, CODE_200, BAD_REQUEST } = require("../constants/general");
 
 class CustomException extends Error {
     code;
@@ -12,7 +12,7 @@ class CustomException extends Error {
 
 class ClientException extends CustomException {
     constructor({ code, message } = {}) {
-        super({ code: code, message: message || "" });
+        super({ code: code || BAD_REQUEST, message: message || "" });
         this.statusCode = CODE_400;
     }
 }

@@ -31,6 +31,9 @@ const patternsForAuthorize = [{
             return errors;
         }
     }, {
+        name: "redirect_uri",
+        required: true,
+    }, {
         name: "client_id",
         required: true,
     }, {
