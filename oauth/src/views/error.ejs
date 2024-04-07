@@ -7,18 +7,14 @@
 <body>
 <div id="main">
     <div class="container">
-
         <div class="left">
-            <div style="text-align: center;">
-                <img src="/image/icons8-github-50.png" class="icon" alt="github">
-            </div>
-            <div style="color: #333; font-size: 12px; margin-top: 10px;">一个基于OAuth2.0的简易用户管理&授权系统</div>
+            <%- include('partial/p1.ejs'); -%>
         </div>
         <div class="right">
-            <div class="title">EASYUMS ERROR</div>
+            <div class="title">ERROR</div>
             <div>
                 <p><%=error %></p>
-                <p style="margin-bottom: 10px;"><%=message %></p>
+                <p style="margin-bottom: 10px; white-space: break-spaces;"><%=message %></p>
             </div>
         </div>
     </div>

@@ -8,17 +8,14 @@
 <div id="main">
     <div class="container">
         <div class="left">
-            <div style="text-align: center;">
-                <img src="/image/icons8-github-50.png" class="icon" alt="github">
-            </div>
-            <div style="color: #333; font-size: 12px; margin-top: 10px;">一个基于OAuth2.0的简易用户管理&授权系统</div>
+            <%- include('partial/p1.ejs'); -%>
         </div>
         <div class="right">
-            <div class="title">EASYUMS APPROVAL</div>
+            <div class="title">APPROVAL</div>
             <div>
                 <% if (!user) { %>
                 <form class="form" action="/oauth2/login" method="POST">
-                    <input type="hidden" name="uuid" value="<%=uuid %>">
+                    <input type="hidden" name="query" value="<%=query %>">
                     <p>
                         <label>
                             <span class="name">账号：</span>
@@ -39,7 +36,7 @@
                 <p style="font-size: 14px; text-align: right; margin-bottom: 10px;">没有账号？<span id="btn-register" class="btn1">注册</span></p>
                 <% } else { %>
                 <p>尊敬的 <span class="distinguish1"><%=user.username%></span> ，</p>
-                <p>[<%=client.name %>]正在向您请求以下权限：</p>
+                <p>[<%=oauthClient.name %>]正在向您请求以下权限：</p>
                 <form class="form" action="/oauth2/approve" method="POST">
                     <input type="hidden" name="uuid" value="<%=uuid %>">
                     <ul>

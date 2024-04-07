@@ -43,11 +43,7 @@ router.post("/register", paramChecker(patternsForRegister), async (ctx) => {
 // 登陆成功后，会记录在redis中（七天）；
 // 为防止使用过期缓存，在修改用户信息时，或许应该把缓存修改？先不管
 router.post("/login", paramChecker(patternsForLogin), async (ctx) => {
-    const { username, password, uuid } = ctx.request.body;
-    const preReq = requestStore.get(uuid);
-    if (!preReq) {
-        throw new CustomException({ code: oauthErrors.UNKNOWN_REQUEST });
-    }
+    let { username, password, query } = ctx.request.body;
     const user = await userService.login(username, password);
     ctx.session.user = user;
     const sessionToken = generateUuid();
@@ -63,8 +59,7 @@ router.post("/login", paramChecker(patternsForLogin), async (ctx) => {
     if (REDIS_OK !== resp) {
         throw new CustomException();
     }
-    const query = { ...preReq.query };
-    query.redirect_uri = encodeURIComponent(query.redirect_uri);
+    query = JSON.parse(query);
     // 登陆后，跳转回授权页面（携带参数）
     ctx.redirect(joinUrl("/oauth2/authorize", query));
 });
@@ -105,17 +100,25 @@ router.get("/authorize", paramChecker(patternsForAuthorize, {
             }
         }
     }
-    const uuid = generateUuid();
-    req.client = client;
-    requestStore.save(uuid, req);
-    const scopes = config.oauth.scopes;
-    let askedScopes = req._scopes;
-    if (!askedScopes) {
-        askedScopes = scope.trim().split(" ");
+    let tempData;
+    // 用户没登录时，不需要记录以下数据
+    if (user) {
+        const uuid = generateUuid();
+        req.client = client;
+        requestStore.save(uuid, req);
+        const scopes = config.oauth.scopes;
+        let askedScopes = req._scopes;
+        if (!askedScopes) {
+            askedScopes = scope.trim().split(" ");
+        }
+        tempData = {
+            oauthClient: client, uuid, scopes, askedScopes, user
+        };
     }
-    await ctx.render('approval', {
-        client, uuid, scopes, askedScopes, user
-    });
+    else {
+        tempData = { user: null, query: JSON.stringify(req.query) };
+    }
+    await ctx.render('approval', tempData);
 });
 
 // 授权；

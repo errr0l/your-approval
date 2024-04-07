@@ -23,7 +23,6 @@ class SimpleMemoryStore {
         }
         // 设置过期时间
         const expiresIn = Date.now() + this.ttl * 1000;
-        console.log("expiresIn：", expiresIn)
         this.store[key] = { value, expiresIn };
         this.keys.push(key);
 
