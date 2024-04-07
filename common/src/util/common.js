@@ -4,6 +4,7 @@ const os = require("os");
 const { v4: uuidV4 } = require("uuid");
 
 const { openidRule } = require("../util/oidcUtil");
+const { scopes: oidcScopes } = require("../constants/oidc")
 
 // 规定客户端秘钥进行编码后，在header的Authorization中传输；
 // 格式为Header.Authorization = Basic base64;
@@ -35,7 +36,7 @@ function getScopesFromBody(scopes) {
         if (key.startsWith(prefix)) {
             let _scope = key.replace(prefix, "");
             // _scopes.push(key.replace(prefix, ""));
-            if (_scope === 'openid') {
+            if (_scope === oidcScopes.OPENID) {
                 _openid = _scope;
             }
             else {
@@ -48,7 +49,7 @@ function getScopesFromBody(scopes) {
         }
     }
     if (shouldAdding) {
-        _scopes.unshift(_openid);
+        _scopes.unshift(_openid || oidcScopes.OPENID);
     }
     return _scopes;
 }

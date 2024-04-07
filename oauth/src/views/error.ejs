@@ -5,11 +5,22 @@
     <link rel="stylesheet" href="/css/layout1.css" />
 </head>
 <body>
-<div class="container">
-    <div class="title">EASYUMS ERROR</div>
-    <div>
-        <p><%=error %></p>
-        <p style="margin-bottom: 10px;"><%=message %></p>
+<div id="main">
+    <div class="container">
+
+        <div class="left">
+            <div style="text-align: center;">
+                <img src="/image/icons8-github-50.png" class="icon" alt="github">
+            </div>
+            <div style="color: #333; font-size: 12px; margin-top: 10px;">一个基于OAuth2.0的简易用户管理&授权系统</div>
+        </div>
+        <div class="right">
+            <div class="title">EASYUMS ERROR</div>
+            <div>
+                <p><%=error %></p>
+                <p style="margin-bottom: 10px;"><%=message %></p>
+            </div>
+        </div>
     </div>
 </div>
 </body>

@@ -5,54 +5,64 @@
     <link rel="stylesheet" href="/css/layout1.css" />
 </head>
 <body>
-<div class="container">
-    <div class="title">EASYUMS REGISTRATION</div>
-    <div>
-        <p>
-            <label>
-                <span class="name">用户名：</span>
-                <input type="text" name="username" placeholder="请输入" />
-            </label>
-        </p>
-        <p>
-            <label>
-                <span class="name">密码：</span>
-                <input type="password" name="password" placeholder="请输入" />
-            </label>
-        </p>
-        <p>
-            <label>
-                <span class="name">确认密码：</span>
-                <input type="password" name="password2" placeholder="请输入" />
-            </label>
-        </p>
-        <p>
-            <label>
-                <span class="name">简介：</span>
-                <textarea name="introduction" placeholder="请输入" rows="2"></textarea>
-            </label>
-        </p>
-        <p>
-            <label>
-                <span class="name">邮箱：</span>
-                <input type="text" name="email" placeholder="请输入" />
-            </label>
-            <button id="send-code" style="margin-left: 10px;">发送认证码</button>
-        </p>
-        <p>
-            <label>
-                <span class="name">验证码：</span>
-                <input type="text" name="code" placeholder="请输入" />
-            </label>
-        </p>
-        <p>
-            <span class="packing1"></span>
-            <button id="btn-register" class="btn btn-success" name="action" value="1">注册</button>
-        </p>
-        <p style="font-size: 14px; text-align: right;">
-            已有账号？
-            <span id="btn-login" style="cursor: pointer; text-decoration: underline; color: blue;">前往登陆</span>
-        </p>
+<div id="main">
+    <div class="container">
+        <div class="left">
+            <div style="text-align: center;">
+                <img src="/image/icons8-github-50.png" class="icon" alt="github">
+            </div>
+            <div style="color: #333; font-size: 12px; margin-top: 10px;">一个简易的用户管理系统</div>
+        </div>
+        <div class="right">
+            <div class="title">EASYUMS REGISTRATION</div>
+            <div>
+                <p>
+                    <label>
+                        <span class="name">用户名：</span>
+                        <input type="text" name="username" placeholder="请输入" />
+                    </label>
+                </p>
+                <p>
+                    <label>
+                        <span class="name">密码：</span>
+                        <input type="password" name="password" placeholder="请输入" />
+                    </label>
+                </p>
+                <p>
+                    <label>
+                        <span class="name">确认密码：</span>
+                        <input type="password" name="password2" placeholder="请输入" />
+                    </label>
+                </p>
+                <p>
+                    <label>
+                        <span class="name">简介：</span>
+                        <textarea name="introduction" placeholder="请输入" rows="2"></textarea>
+                    </label>
+                </p>
+                <p>
+                    <label>
+                        <span class="name">邮箱：</span>
+                        <input type="text" name="email" placeholder="请输入" />
+                    </label>
+                    <button id="send-code" style="margin-left: 10px;">发送认证码</button>
+                </p>
+                <p>
+                    <label>
+                        <span class="name">验证码：</span>
+                        <input type="text" name="code" placeholder="请输入" />
+                    </label>
+                </p>
+                <p>
+                    <span class="packing1"></span>
+                    <button id="btn-register" class="btn btn-success" name="action" value="1">注册</button>
+                </p>
+                <p style="font-size: 14px; text-align: right; margin-bottom: 10px;">
+                    已有账号？
+                    <span id="btn-login" class="btn1">前往登陆</span>
+                </p>
+            </div>
+        </div>
     </div>
 </div>
 <script>
@@ -154,6 +164,12 @@
         }
     }
 
+    /**
+     * 发送邮箱验证码；
+     * emailVerifyCodeApi对应的是app.ini的server.email_verify_code_api，是发送邮件的接口；
+     * 如果没有该接口的情况下，作为发送邮箱验证码的代替，可以向redis中存储以格式为'EASYSHOP_[邮箱]'的值；
+     * 如在redis中添加value：set EASYSHOP_abc@123.com 123，此时，验证码为123；
+     */
     function sendCode() {
         const email = iptEmail.value;
         if (!email) {
@@ -163,7 +179,7 @@
             return window.alert("邮箱格式不正确");
         }
         request({
-            method: 'POST', url: 'http://errol.shenzhuo.vip:26107/0/easyshop/portal/captcha/emailVerifyCode',
+            method: 'POST', url: '<%=emailVerifyCodeApi%>',
             headers: { 'Content-Type': 'application/json' },
             data: { email: email },
             success(resp) {

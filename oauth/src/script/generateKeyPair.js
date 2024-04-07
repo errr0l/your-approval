@@ -20,8 +20,12 @@ const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
 
 
 try {
-    fs.writeFileSync(path.resolve(process.cwd(), './secrets/rsa_private_key.pem'), privateKey);
-    fs.writeFileSync(path.resolve(process.cwd(), './secrets/rsa_public_key.pem'), publicKey);
+    const dir = path.resolve(process.cwd(), './secrets1');
+    if (!fs.existsSync(dir)) {
+        fs.mkdirSync(dir);
+    }
+    fs.writeFileSync(dir + '/rsa_private_key.pem', privateKey);
+    fs.writeFileSync(dir + '/rsa_public_key.pem', publicKey);
 } catch (error) {
     console.log(error);
 }

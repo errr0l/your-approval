@@ -16,7 +16,7 @@ function paramChecker(patterns, opts= {}) {
         const { errorHandler, errorCode = "" } = opts;
         const query = ctx.request.query;
         const body = ctx.request.body;
-        let headers;
+        const headers = ctx.request.headers;
         const errors = [];
         for (let pattern of patterns) {
             const { position, rules } = pattern;
@@ -30,9 +30,6 @@ function paramChecker(patterns, opts= {}) {
                     value = body[name];
                 }
                 else if (position === PARAM_POSITION_HEADER) {
-                    if (!headers) {
-                        headers = ctx.request.headers;
-                    }
                     value = headers[name];
                 }
                 else {
@@ -50,7 +47,7 @@ function paramChecker(patterns, opts= {}) {
                     try {
                         const _error = await rule.validator(value, rule, ctx);
                         // 目前只处理两种类型，一种是Array<String>，另一个是String；
-                        // 也可以通过异常返回错误消息；
+                        // 也可以通过自行在validator中抛出异常，此时异常会被外部的[try... catch...]捕获
                         if (Array.isArray(_error)) {
                             errors.push(..._error);
                         }

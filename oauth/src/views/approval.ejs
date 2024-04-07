@@ -5,61 +5,71 @@
     <link rel="stylesheet" href="/css/layout1.css" />
 </head>
 <body>
-<div class="container">
-    <div class="title">EASYUMS APPROVAL</div>
-    <div>
-        <% if (!user) { %>
-        <form class="form" action="/oauth2/login" method="POST">
-            <input type="hidden" name="uuid" value="<%=uuid %>">
-            <p>
-                <label>
-                    <span class="name">账号：</span>
-                    <input type="text" name="username" placeholder="请输入用户名/邮箱" />
-                </label>
-            </p>
-            <p>
-                <label>
-                    <span class="name">密码：</span>
-                    <input type="password" name="password" placeholder="请输入" />
-                </label>
-            </p>
-            <p>
-                <span class="packing1"></span>
-                <button type="submit" class="btn btn-success" name="action" value="1">登陆</button>
-            </p>
-        </form>
-        <p style="font-size: 14px; text-align: right; margin-bottom: 10px;">没有账号？<span id="btn-register" style="cursor: pointer; text-decoration: underline; color: blue;">注册</span></p>
-        <% } else { %>
-        <p><%=user.username%>，</p>
-        <p>[<%=client.name %>]正在向您请求以下权限：</p>
-        <form class="form" action="/oauth2/approve" method="POST">
-            <input type="hidden" name="uuid" value="<%=uuid %>">
-            <ul>
-                <% askedScopes.forEach(function (item) { %>
-                    <% var openid = item === 'openid'; %>
-                    <% if (openid) { %>
-                    <li style="display: none;">
+<div id="main">
+    <div class="container">
+        <div class="left">
+            <div style="text-align: center;">
+                <img src="/image/icons8-github-50.png" class="icon" alt="github">
+            </div>
+            <div style="color: #333; font-size: 12px; margin-top: 10px;">一个基于OAuth2.0的简易用户管理&授权系统</div>
+        </div>
+        <div class="right">
+            <div class="title">EASYUMS APPROVAL</div>
+            <div>
+                <% if (!user) { %>
+                <form class="form" action="/oauth2/login" method="POST">
+                    <input type="hidden" name="uuid" value="<%=uuid %>">
+                    <p>
                         <label>
-                            <input id="scope_<%=item%>" name="scope_<%=item%>" checked type="checkbox" />
+                            <span class="name">账号：</span>
+                            <input type="text" name="username" placeholder="请输入用户名/邮箱" />
                         </label>
-                    </li>
-                    <% } else { %>
-                    <li>
+                    </p>
+                    <p>
                         <label>
-                            <input id="scope_<%=item%>" name="scope_<%=item%>" checked type="checkbox" />
-                            <span><%=scopes[item]%></span>
+                            <span class="name">密码：</span>
+                            <input type="password" name="password" placeholder="请输入" />
                         </label>
-                    </li>
-                    <% } %>
-                <% }) %>
-            </ul>
-            <p style="margin-bottom: 10px;">
-                <span class="packing2"></span>
-                <button type="submit" class="act1" name="action" value="1">同意</button>
-                <button type="submit" class="act2" name="action" value="2">拒绝</button>
-            </p>
-        </form>
-        <% } %>
+                    </p>
+                    <p>
+                        <span class="packing1"></span>
+                        <button type="submit" class="btn btn-success" name="action" value="1">登陆</button>
+                    </p>
+                </form>
+                <p style="font-size: 14px; text-align: right; margin-bottom: 10px;">没有账号？<span id="btn-register" class="btn1">注册</span></p>
+                <% } else { %>
+                <p>尊敬的 <span class="distinguish1"><%=user.username%></span> ，</p>
+                <p>[<%=client.name %>]正在向您请求以下权限：</p>
+                <form class="form" action="/oauth2/approve" method="POST">
+                    <input type="hidden" name="uuid" value="<%=uuid %>">
+                    <ul>
+                        <% askedScopes.forEach(function (item) { %>
+                            <% var openid = item === 'openid'; %>
+                            <% if (openid) { %>
+                            <li style="display: none;">
+                                <label>
+                                    <input id="scope_<%=item%>" name="scope_<%=item%>" checked type="checkbox" />
+                                </label>
+                            </li>
+                            <% } else { %>
+                            <li>
+                                <label>
+                                    <input id="scope_<%=item%>" name="scope_<%=item%>" checked type="checkbox" />
+                                    <span><%=scopes[item]%></span>
+                                </label>
+                            </li>
+                            <% } %>
+                        <% }) %>
+                    </ul>
+                    <p style="margin-bottom: 10px;">
+                        <span class="packing2"></span>
+                        <button type="submit" class="act1" name="action" value="1">同意</button>
+                        <button type="submit" class="act2" name="action" value="2">拒绝</button>
+                    </p>
+                </form>
+                <% } %>
+            </div>
+        </div>
     </div>
 </div>
 <script>

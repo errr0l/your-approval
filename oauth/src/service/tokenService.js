@@ -27,9 +27,6 @@ async function getTokensByUserId(id) {
 async function delTokensByUserId(id) {
     const rows = await getTokensByUserId(id);
     if (rows.length) {
-        // const sql = "delete from `token` where `id` = (?)";
-        // const id = rows[0].id;
-        // await pool.query(sql, [id]);
         await delToken(rows[0]);
     }
 }

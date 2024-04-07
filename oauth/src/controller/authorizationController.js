@@ -22,7 +22,7 @@ const router = new Router({
 });
 
 router.get("/register", async (ctx) => {
-    await ctx.render("register");
+    await ctx.render("register", { emailVerifyCodeApi: config.server.email_verify_code_api });
 });
 
 router.post("/register", paramChecker(patternsForRegister), async (ctx) => {
@@ -202,7 +202,7 @@ router.post("/token", paramChecker(patternsForToken, {
         if (preReq._containedOpenid) {
             const idTokenPayload = {
                 client_id: clientId,
-                openid: encodeWithMd5(clientId + "@" + user.id),
+                openid: encodeWithMd5(clientId + "-" + user.id + "@" + generateUuid()),
                 userinfo: buildUserinfo(preReq.scopes, user)
             };
             respData.payload[ID_TOKEN] = tokenUtil.generateIdToken(idTokenPayload);

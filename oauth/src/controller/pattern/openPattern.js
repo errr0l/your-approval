@@ -4,6 +4,7 @@ const { responseTypes, grantTypes } = require("../../constants/oauth");
 const config = require("../../config/appConfig");
 const { openidRule } = require("../../../../common/src/util/oidcUtil");
 const emailRule = /^[a-zA-Z0-9_-]+@[a-zA-Z0-9_-]+(.[a-zA-Z0-9_-]+)+$/;
+const { scopes: oidcScopes } = require("../../../../common/src/constants/oidc");
 
 // 当然，不以这种方式来校验也是可以的，只是说使用这种校验形式可以使得业务代码更集中;
 // 重新考虑了一下，虽然js可以轻易做到在任何地方做校验，但其他语言可能不行，所以有些校验应该放在业务层，这里只校验一些静态规则；
@@ -48,18 +49,16 @@ const patternsForAuthorize = [{
                 const scopes = config.oauth.scopes;
                 let containedOpenid = false;
                 const _scopes = value.split(" ");
-
                 const scopeArr = Object.keys(scopes);
                 for (let _scope of _scopes) {
                     if (!scopeArr.includes(_scope)) {
                         errors.push("无效的权限范围");
                         break;
                     }
-                    if (!containedOpenid && _scope === 'openid') {
+                    if (!containedOpenid && (_scope === oidcScopes.OPENID)) {
                         containedOpenid = true;
                     }
                 }
-
                 // 如果使用了oidc，则必须包含openid
                 if (openidRule.test(value) && !containedOpenid) {
                     errors.push("缺少openid权限范围");

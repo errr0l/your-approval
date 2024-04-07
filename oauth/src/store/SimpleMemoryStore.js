@@ -1,7 +1,8 @@
 const { CustomException } = require("../../../common/src/exception");
 const { errors } = require("../constants/oauth");
 
-// 一个简易的基于内存的对象存储空间
+// 一个简易的基于内存的key-value存储器；
+// 该存储器会自动清除超时的key；
 class SimpleMemoryStore {
     store = {}; keys = []; ttl;
     timer; limit;
@@ -21,13 +22,15 @@ class SimpleMemoryStore {
             throw new CustomException({ message: errors.SERVER_BUSY });
         }
         // 设置过期时间
-        const expiresIn = Date.now() + this.ttl;
+        const expiresIn = Date.now() + this.ttl * 1000;
+        console.log("expiresIn：", expiresIn)
         this.store[key] = { value, expiresIn };
         this.keys.push(key);
 
         // 设定过期时间
         if (!this.timer) {
             this.timer = setTimeout(() => {
+                console.log("[SimpleMemoryStore]执行清理任务...");
                 const current = Date.now();
                 const _keys = [];
                 for (let _key of this.keys) {
@@ -35,7 +38,8 @@ class SimpleMemoryStore {
                     // 获取不到说明已经被删除了，此时无需再理会；
                     // 只需保留未过期的key；
                     if (_valueObj) {
-                        if (_valueObj.expiresIn >= current) {
+                        if (_valueObj.expiresIn <= current) {
+                            console.log("[SimpleMemoryStore]清理过期的key：" + key);
                             this._del(key);
                         }
                         else {
