@@ -72,7 +72,7 @@ class SimpleMemoryStore {
         }
         const current = Date.now();
         // 删除过期请求
-        if (valueObj.expiresIn >= current) {
+        if (valueObj.expiresIn <= current) {
             this._del(key);
             return null;
         }

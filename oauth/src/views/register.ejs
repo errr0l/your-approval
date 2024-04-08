@@ -42,7 +42,7 @@
                         <span class="name">邮箱：</span>
                         <input type="text" name="email" placeholder="请输入" />
                     </label>
-                    <button id="send-code" style="margin-left: 10px;">发送认证码</button>
+                    <button id="send-code" style="margin-left: 10px;">发送验证码</button>
                 </p>
                 <p>
                     <label>
@@ -105,12 +105,12 @@
                     }
                 }
                 else {
-                    window.alert("注册失败");
+                    window.alert("注册失败;" + resp.message);
                 }
             },
             error(resp) {
                 console.log(resp);
-                window.alert("注册失败");
+                window.alert("注册失败;" + resp.message);
             }
         })
     });
@@ -161,12 +161,7 @@
         }
     }
 
-    /**
-     * 发送邮箱验证码；
-     * emailVerifyCodeApi对应的是app.ini的server.email_verify_code_api，是发送邮件的接口；
-     * 如果没有该接口的情况下，作为发送邮箱验证码的代替，可以向redis中存储以格式为'EASYSHOP_[邮箱]'的值；
-     * 如在redis中添加value：set EASYSHOP_abc@123.com 123，此时，验证码为123；
-     */
+    // 发送邮箱验证码
     function sendCode() {
         const email = iptEmail.value;
         if (!email) {
@@ -176,11 +171,11 @@
             return window.alert("邮箱格式不正确");
         }
         request({
-            method: 'POST', url: '<%=emailVerifyCodeApi%>',
+            method: 'POST', url: '/assist/captcha/sendCode',
             headers: { 'Content-Type': 'application/json' },
             data: { email: email },
             success(resp) {
-                if (resp.code === 0) {
+                if (!resp.error) {
                     window.alert("发送成功");
                 }
                 else {
@@ -189,7 +184,7 @@
             },
             error(error) {
                 console.log(error);
-                window.alert("发送失败");
+                window.alert("发送失败：" + error.message);
             }
         });
     }

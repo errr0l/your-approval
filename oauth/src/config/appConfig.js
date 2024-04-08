@@ -14,4 +14,6 @@ if (!fs.existsSync(configFilePath)) {
 }
 const appConfig = parse(fs.readFileSync(configFilePath, { encoding: 'utf-8' }));
 
+appConfig.rootDir = rootDir;
+
 module.exports = appConfig;

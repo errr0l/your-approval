@@ -13,7 +13,7 @@ const { ClientException } = require("../exception/index");
  */
 function paramChecker(patterns, opts= {}) {
     return async function (ctx, next) {
-        const { errorHandler, errorCode = "" } = opts;
+        const { errorHandler, errorCode } = opts;
         const query = ctx.request.query;
         const body = ctx.request.body;
         const headers = ctx.request.headers;
@@ -64,7 +64,7 @@ function paramChecker(patterns, opts= {}) {
             if (errorHandler && typeof errorHandler == 'function') {
                 errorHandler(errors, ctx);
             }
-            throw new ClientException({ code: errorCode, message: errors.join(";") });
+            throw new ClientException({ code: typeof errorCode == 'function' ? errorCode(error) : errorCode, message: errors.join(";") });
         }
         // don't forget to call next() with 'await`, or else a 404 error will be caused;
         await next();

@@ -10,9 +10,10 @@ const path = require("path");
 // 本系统只实现了授权码模式，且参数传递没有做适配；
 const app = new Koa();
 
-const openRouter = require("./controller/authorizationController");
+const authorizationRouter = require("./controller/authorizationController");
 const resourceRouter = require("./controller/resourceController");
 const testRouter = require("./controller/testController");
+const assistRouter = require("./controller/assistController");
 
 const config = require("./config/appConfig");
 const errorHandler = require("../../common/src/middleware/globalErrorHandler");
@@ -32,9 +33,10 @@ app.use(views(path.join(__dirname, "./views"), {
 app.use(_static(path.join(__dirname, '../static')));
 
 app.use(errorHandler);
-app.use(openRouter.routes());
+app.use(authorizationRouter.routes());
 app.use(resourceRouter.routes());
 app.use(testRouter.routes());
+app.use(assistRouter.routes());
 
 // 如果不在listen方法中指定绑定的地址的话，通过ip或localhost都可以访问；
 // app.listen(port, host, function);

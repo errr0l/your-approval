@@ -36,6 +36,7 @@
                 <p style="font-size: 14px; text-align: right; margin-bottom: 10px;">没有账号？<span id="btn-register" class="btn1">注册</span></p>
                 <% } else { %>
                 <p>尊敬的 <span class="distinguish1"><%=user.username%></span> ，</p>
+                <!-- 使用include时，名称为client的变量会冲突 -->
                 <p>[<%=oauthClient.name %>]正在向您请求以下权限：</p>
                 <form class="form" action="/oauth2/approve" method="POST">
                     <input type="hidden" name="uuid" value="<%=uuid %>">

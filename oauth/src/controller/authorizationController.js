@@ -6,7 +6,7 @@ const { joinUrl } = require("../../../common/src/util/urlUtil");
 const tokenService = require("../service/tokenService");
 const tokenUtil = require("../util/tokenGenerator");
 const { errors: oauthErrors, grantTypes, responseTypes } = require("../constants/oauth");
-const { patternsForAuthorize, patternsForApprove, patternsForToken, patternsForLogin, patternsForRegister } = require("./pattern/openPattern");
+const patterns = require("./pattern/patternsForAuthorizationController");
 const paramChecker = require("../../../common/src/middleware/paramChecker");
 const { OauthException, CustomException, ClientException } = require("../../../common/src/exception");
 const clientService = require("../service/clientService");
@@ -16,6 +16,7 @@ const config = require("../config/appConfig");
 const userService = require("../service/userService");
 const { client: redisClient } = require("../config/redisHelper");
 const { buildUserinfo } = require("../../../common/src/util/oidcUtil");
+const emailService = require("../service/emailService");
 
 const router = new Router({
     prefix: "/oauth2"
@@ -25,13 +26,10 @@ router.get("/register", async (ctx) => {
     await ctx.render("register", { emailVerifyCodeApi: config.server.email_verify_code_api });
 });
 
-router.post("/register", paramChecker(patternsForRegister), async (ctx) => {
+router.post("/register", paramChecker(patterns.register), async (ctx) => {
     const formData = ctx.request.body;
-    // 获取验证码（使用了easyshop-portal中的邮件服务）
-    const _code = await redisClient.getdel(EASYSHOP_REDIS_PREFIX + formData.email);
-    if (_code !== formData.code) {
-        throw new ClientException({ message: '验证码不正确或已失效' });
-    }
+    // 核对验证码；不使用接口，直接操作redis也是可以的；
+    await emailService.verify(formData.code, formData.email);
     if (await userService.register(formData)) {
         ctx.body = { error: '', message: '注册成功' };
     }
@@ -42,7 +40,7 @@ router.post("/register", paramChecker(patternsForRegister), async (ctx) => {
 
 // 登陆成功后，会记录在redis中（七天）；
 // 为防止使用过期缓存，在修改用户信息时，或许应该把缓存修改？先不管
-router.post("/login", paramChecker(patternsForLogin), async (ctx) => {
+router.post("/login", paramChecker(patterns.login), async (ctx) => {
     let { username, password, query } = ctx.request.body;
     const user = await userService.login(username, password);
     ctx.session.user = user;
@@ -60,11 +58,12 @@ router.post("/login", paramChecker(patternsForLogin), async (ctx) => {
         throw new CustomException();
     }
     query = JSON.parse(query);
+    query.redirect_uri = encodeURIComponent(query.redirect_uri);
     // 登陆后，跳转回授权页面（携带参数）
     ctx.redirect(joinUrl("/oauth2/authorize", query));
 });
 
-router.get("/authorize", paramChecker(patternsForAuthorize, {
+router.get("/authorize", paramChecker(patterns.authorize, {
     errorHandler: (errors, ctx) => {
         if (ctx.request.query.redirect_uri) {
             // 如果是当前请求，会自动解码
@@ -79,14 +78,6 @@ router.get("/authorize", paramChecker(patternsForAuthorize, {
 }), async (ctx, next) => {
     const req = ctx.request;
     const { client_id: clientId, redirect_uri: redirectUri, scope } = req.query;
-    const client = await clientService.getClientById(clientId);
-    req.redirectUri = decodeURIComponent(redirectUri);
-    if (!client) {
-        throw new OauthException({
-            code: oauthErrors.UNKNOWN_CLIENT,
-            redirectUrl: req.redirectUri
-        });
-    }
     // 在session中获取user；
     // 如果已经过期时，从redis中获取，并赋予session（相当于重新登陆）；
     let user = ctx.session.user;
@@ -103,6 +94,14 @@ router.get("/authorize", paramChecker(patternsForAuthorize, {
     let tempData;
     // 用户没登录时，不需要记录以下数据
     if (user) {
+        const client = await clientService.getClientById(clientId);
+        req.redirectUri = decodeURIComponent(redirectUri);
+        if (!client) {
+            throw new OauthException({
+                code: oauthErrors.UNKNOWN_CLIENT,
+                redirectUrl: req.redirectUri
+            });
+        }
         const uuid = generateUuid();
         req.client = client;
         requestStore.save(uuid, req);
@@ -123,7 +122,7 @@ router.get("/authorize", paramChecker(patternsForAuthorize, {
 
 // 授权；
 // 用户可在授权页面上进行操作；
-router.post("/approve", paramChecker(patternsForApprove), async (ctx, next) => {
+router.post("/approve", paramChecker(patterns.approve), async (ctx, next) => {
     const { action, uuid, ...scopes } = ctx.request.body;
     const _scopes = getScopesFromBody(scopes); // 即真正授权范围
     const preReq = requestStore.get(uuid);
@@ -160,7 +159,7 @@ router.post("/approve", paramChecker(patternsForApprove), async (ctx, next) => {
 });
 
 // 兑换token；
-router.post("/token", paramChecker(patternsForToken, {
+router.post("/token", paramChecker(patterns.token, {
     errorHandler: (errors, ctx) => {
         throw new ClientException({ code: oauthErrors.INVALID_REQUEST, message: errors.join(";") });
     },

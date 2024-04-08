@@ -8,7 +8,7 @@ const { scopes: oidcScopes } = require("../../../../common/src/constants/oidc");
 
 // 当然，不以这种方式来校验也是可以的，只是说使用这种校验形式可以使得业务代码更集中;
 // 重新考虑了一下，虽然js可以轻易做到在任何地方做校验，但其他语言可能不行，所以有些校验应该放在业务层，这里只校验一些静态规则；
-const patternsForAuthorize = [{
+const authorize = [{
     position: "query",
     rules: [{
         name: "response_type",
@@ -71,7 +71,7 @@ const patternsForAuthorize = [{
     }]
 }];
 
-const patternsForApprove = [{
+const approve = [{
     position: "body",
     rules: [{
         name: "uuid",
@@ -93,7 +93,7 @@ const patternsForApprove = [{
     }]
 }];
 
-const patternsForToken = [{
+const token = [{
     position: "body",
     rules: [{
         name: "grant_type",
@@ -130,7 +130,7 @@ const patternsForToken = [{
     }]
 }];
 
-const patternsForLogin = [{
+const login = [{
     position: "body",
     rules: [{
         name: "username",
@@ -142,9 +142,15 @@ const patternsForLogin = [{
         name: "password",
         required: true,
     }]
+}, {
+    position: "body",
+    rules: [{
+        name: "query",
+        required: true,
+    }]
 }];
 
-const patternsForRegister = [{
+const register = [{
     position: "body",
     rules: [{
         name: "username",
@@ -200,5 +206,5 @@ const patternsForRegister = [{
 }];
 
 module.exports = {
-    patternsForAuthorize, patternsForApprove, patternsForToken, patternsForLogin, patternsForRegister
+    authorize: authorize, approve: approve, token: token, login: login, register: register, emailRule
 }
