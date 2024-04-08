@@ -16,8 +16,19 @@
                 <p><%=error %></p>
                 <p style="margin-bottom: 10px; white-space: break-spaces;"><%=message %></p>
             </div>
+            <p style="font-size: 14px; margin-bottom: 0;">
+                <span id="btn-back" class="btn1">
+                    返回
+                </span>
+            </p>
         </div>
     </div>
 </div>
+<script>
+    const btnBack = document.querySelector("#btn-back");
+    btnBack.addEventListener('click', function () {
+        window.history.back();
+    });
+</script>
 </body>
 </html>
