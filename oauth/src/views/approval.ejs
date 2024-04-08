@@ -72,6 +72,7 @@
 </div>
 <script>
     const btnRegister = document.querySelector("#btn-register");
+    window.sessionStorage.setItem("href", window.location.href);
     if (btnRegister) {
         btnRegister.addEventListener('click', function () {
             window.location.href = "/oauth2/register" + window.location.search;

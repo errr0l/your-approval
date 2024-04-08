@@ -199,7 +199,6 @@ router.post("/token", paramChecker(patterns.token, {
                 token_type: "bearer"
             }
         };
-
         // 在校验时添加的属性
         if (preReq._containedOpenid) {
             const idTokenPayload = {

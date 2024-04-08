@@ -1,4 +1,4 @@
-const { scopes } = require("../constants/oidc");
+const { scopes: oidcScopes } = require("../constants/oidc");
 // 各权限范围对应的字段
 const profileFields = ['name', 'username', 'avatar', 'nickname', 'preferred_username', 'introduction', 'picture', 'website', 'gender', 'birthdate', 'zoneinfo', 'locale', 'created_at'];
 const emailFields = ['email', 'email_verified'];
@@ -7,7 +7,7 @@ const openidFields = ['id'];
 const addressFields = ['address'];
 
 // 权限范围包含其中的一个，则自动添加openid权限范围
-const openidRule = new RegExp(Object.values(scopes).filter(item => item !== scopes.OPENID).join("|"));
+const openidRule = new RegExp(Object.values(oidcScopes).filter(item => item !== oidcScopes.OPENID).join("|"));
 
 function setValues(userinfo, fields, user) {
     for (const key of fields) {
@@ -25,19 +25,19 @@ function setValues(userinfo, fields, user) {
 function buildUserinfo(scopes, user) {
     const userinfo = {};
     for (const scope of scopes) {
-        if (scope === scopes.OPENID) {
+        if (scope === oidcScopes.OPENID) {
             setValues(userinfo, openidFields, user);
         }
-        else if (scope === scopes.PROFILE) {
+        else if (scope === oidcScopes.PROFILE) {
             setValues(userinfo, profileFields, user);
         }
-        else if (scope === scopes.EMAIL) {
+        else if (scope === oidcScopes.EMAIL) {
             setValues(userinfo, emailFields, user);
         }
-        else if (scope === scopes.PHONE) {
+        else if (scope === oidcScopes.PHONE) {
             setValues(userinfo, phoneFields, user);
         }
-        else if (scope === scopes.ADDRESS) {
+        else if (scope === oidcScopes.ADDRESS) {
             setValues(userinfo, addressFields, user);
         }
     }

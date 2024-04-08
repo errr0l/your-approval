@@ -27,7 +27,13 @@
 <script>
     const btnBack = document.querySelector("#btn-back");
     btnBack.addEventListener('click', function () {
-        window.history.back();
+        const href = window.sessionStorage.getItem("href");
+        if (href) {
+            window.location.href = window.sessionStorage.getItem("href");
+        }
+        else {
+            window.history.back();
+        }
     });
 </script>
 </body>
