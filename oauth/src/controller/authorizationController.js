@@ -1,7 +1,7 @@
 // 认证相关
 const Router = require('koa-router');
 
-const { ACT_1, ACT_2, ID_TOKEN, REDIS_OK, EASYSHOP_REDIS_PREFIX } = require("../../../common/src/constants/general");
+const { ACT_1, ACT_2, ID_TOKEN, REDIS_OK } = require("../../../common/src/constants/general");
 const { joinUrl } = require("../../../common/src/util/urlUtil");
 const tokenService = require("../service/tokenService");
 const tokenUtil = require("../util/tokenGenerator");
@@ -22,8 +22,38 @@ const router = new Router({
     prefix: "/oauth2"
 });
 
+router.get("/", async (ctx) => {
+    const { from } = ctx.request.query;
+    let title = "WELCOME";
+    let message = ":D you're here.";
+    if (from === "logout") {
+        title = "BYE!";
+        message = "hope to see you again.";
+    }
+    await ctx.render("index", { title, message });
+});
+
 router.get("/register", async (ctx) => {
-    await ctx.render("register", { emailVerifyCodeApi: config.server.email_verify_code_api });
+    await ctx.render("register");
+});
+
+router.get("/logout", async (ctx) => {
+    const user = ctx.session.user;
+    if (user.id) {
+        console.log("登出用户：%s", ctx.session.user.id);
+        ctx.session = {};
+    }
+    const sessionToken = ctx.cookies.get("session_token");
+    if (sessionToken) {
+        console.log("删除sessionToken：" + sessionToken);
+        const result = await redisClient.del(sessionToken);
+        console.log(result);
+        ctx.cookies.set('session_token', "", {
+            maxAge: 0
+        });
+    }
+    let path = "/oauth2?from=logout";
+    await ctx.redirect(path);
 });
 
 router.post("/register", paramChecker(patterns.register), async (ctx) => {
@@ -66,8 +96,6 @@ router.post("/login", paramChecker(patterns.login), async (ctx) => {
 router.get("/authorize", paramChecker(patterns.authorize, {
     errorHandler: (errors, ctx) => {
         if (ctx.request.query.redirect_uri) {
-            // 如果是当前请求，会自动解码
-            // redirectUri = decodeURIComponent(redirectUri);
             throw new OauthException({
                 code: oauthErrors.INVALID_REQUEST, message: errors.join(";"),
                 redirectUrl: decodeURIComponent(ctx.request.query.redirect_uri)

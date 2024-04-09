@@ -21,6 +21,7 @@ body {
 #main .container .right {
     flex: 3;
     word-break: break-all;
+    position: relative;
 }
 .title {
     font-size: 20px;
@@ -51,4 +52,12 @@ label .name {
 .icon {
     width: 64px;
     height: 64px;
+}
+#btn-logout {
+    font-size: 12px;
+    position: absolute;
+    top: 0;
+    right: 0;
+    color: #9e9e9e;
+    cursor: pointer;
 }

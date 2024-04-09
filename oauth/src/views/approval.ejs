@@ -35,6 +35,7 @@
                 </form>
                 <p style="font-size: 14px; text-align: right; margin-bottom: 10px;">没有账号？<span id="btn-register" class="btn1">注册</span></p>
                 <% } else { %>
+                <div id="btn-logout">登出</div>
                 <p>尊敬的 <span class="distinguish1"><%=user.username%></span> ，</p>
                 <!-- 使用include时，名称为client的变量会冲突 -->
                 <p>[<%=oauthClient.name %>]正在向您请求以下权限：</p>
@@ -72,10 +73,18 @@
 </div>
 <script>
     const btnRegister = document.querySelector("#btn-register");
+    const btnLogout = document.querySelector("#btn-logout");
     window.sessionStorage.setItem("href", window.location.href);
     if (btnRegister) {
         btnRegister.addEventListener('click', function () {
             window.location.href = "/oauth2/register" + window.location.search;
+        });
+    }
+    if (btnLogout) {
+        btnLogout.addEventListener('click', function () {
+            if (window.confirm('确认登出')) {
+                window.location.href = "/oauth2/logout";
+            }
         });
     }
 </script>
