@@ -231,7 +231,7 @@ router.post("/token", paramChecker(patterns.token, {
         if (preReq._containedOpenid) {
             const idTokenPayload = {
                 client_id: clientId,
-                openid: encodeWithMd5(clientId + "-" + user.id + "@" + generateUuid()),
+                openid: encodeWithMd5(clientId + "@" + user.id),
                 userinfo: buildUserinfo(preReq.scopes, user)
             };
             respData.payload[ID_TOKEN] = tokenUtil.generateIdToken(idTokenPayload);
