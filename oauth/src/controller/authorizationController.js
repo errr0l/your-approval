@@ -1,7 +1,7 @@
 // 认证相关
 const Router = require('koa-router');
 
-const { ACT_1, ACT_2, ID_TOKEN, REDIS_OK } = require("../../../common/src/constants/general");
+const { ACT_1, ACT_2, ID_TOKEN, REDIS_OK, AUTHORIZATION } = require("../../../common/src/constants/general");
 const { joinUrl } = require("../../../common/src/util/urlUtil");
 const tokenService = require("../service/tokenService");
 const tokenUtil = require("../util/tokenGenerator");
@@ -202,7 +202,7 @@ router.post("/token", paramChecker(patterns.token, {
         throw new ClientException({ code: oauthErrors.INVALID_CODE });
     }
     const client = preReq.client;
-    const { secret, id } = decodeClientCredentials(req.headers['authorization']);
+    const { secret, id } = decodeClientCredentials(req.headers[AUTHORIZATION]);
     // 校验客户端
     if ((+id !== clientId) || (client.id !== clientId) || (client.secret !== secret)) {
         throw new ClientException({ code: oauthErrors.INVALID_CLIENT });

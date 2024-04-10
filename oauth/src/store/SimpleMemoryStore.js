@@ -48,7 +48,7 @@ class SimpleMemoryStore {
                 }
                 clearTimeout(this.timer);
                 this.timer = null;
-                this.keys.length = 0;
+                // this.keys.length = 0;
                 this.keys = _keys;
             }, 1000 * this.ttl);
         }

@@ -13,7 +13,7 @@ async function getTokenById(id) {
 }
 
 /**
- * 根据clientId获取token列表
+ * 根据userId获取token列表
  * @param id 用户id
  * @returns {Promise<Array>}
  */

@@ -1,4 +1,3 @@
-
 const SimpleMemoryStore = require("./SimpleMemoryStore");
 const config = require("../config/appConfig");
 let codeExpiresIn = +config.oauth.code_expires_in;
