@@ -113,6 +113,8 @@ npm run start
 
 以下仅提供了基于js的代码，对于js以外的语言，其实也是大同小异，如有需要还请自行实现。
 
+> https://github.com/xxzhiwei/demo/tree/master/easyums-demo
+
 ***
 
 参考资料（感谢）：
