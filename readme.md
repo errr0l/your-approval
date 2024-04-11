@@ -109,6 +109,14 @@ chmod u+x bin/www
 npm run start
 ```
 
+在终端看到如下输出信息后，表示系统启动成功。
+
+```text
+App running at：
+- http://localhost:8084
+- http://192.168.3.18:8084
+```
+
 ## 对接示例
 
 以下仅提供了基于js的代码，对于js以外的语言，其实也是大同小异，如有需要还请自行实现。

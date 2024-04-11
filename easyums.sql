@@ -31,7 +31,7 @@ CREATE TABLE `client` (
   `description` varchar(255) DEFAULT NULL,
   `status` tinyint(4) DEFAULT '1',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='oauth客户端';
+) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='oauth客户端';
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -40,7 +40,7 @@ CREATE TABLE `client` (
 
 LOCK TABLES `client` WRITE;
 /*!40000 ALTER TABLE `client` DISABLE KEYS */;
-INSERT INTO `client` VALUES (1,'123','http://localhost:9528/easyblog/admin/#/oauth2/callback','123','测试客户端1','123',1);
+INSERT INTO `client` VALUES (1,'123','http://localhost:9528/easyblog/admin/#/oauth2/callback','123','测试客户端1','123',1),(2,'easyums@demo1','http://localhost:8887/#/oauth2/callback','openid profile email','测试客户端2',NULL,1);
 /*!40000 ALTER TABLE `client` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -69,7 +69,6 @@ CREATE TABLE `token` (
 
 LOCK TABLES `token` WRITE;
 /*!40000 ALTER TABLE `token` DISABLE KEYS */;
-INSERT INTO `token` VALUES ('3d5229a7edf1484d8898d40dcbaa8e62','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6MSwidXNlcklkIjo0LCJ0b2tlbklkIjoiM2Q1MjI5YTdlZGYxNDg0ZDg4OThkNDBkY2JhYThlNjIiLCJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiaWF0IjoxNzEyMzExMTg4LCJleHAiOjE3MTIzMTgzODgsImlzcyI6ImVhc3l1bXMgb2F1dGgifQ.rFKUnsP0gRdwewq3ADVHaLEv7B0rlrU0LjuJ91fANL4','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6MSwidXNlcklkIjo0LCJ0b2tlbklkIjoiM2Q1MjI5YTdlZGYxNDg0ZDg4OThkNDBkY2JhYThlNjIiLCJ0eXBlIjoicmVmcmVzaF90b2tlbiIsImlhdCI6MTcxMjMxMTE4OCwiZXhwIjoxNzEyOTE1OTg4LCJpc3MiOiJlYXN5dW1zIG9hdXRoIn0.Vor1W20jjtWq2RrPp2syOuIU9mnh9AE9CGBCepAGNeA',1,'openid profile email',4),('487278e595724ea9950a772e1b18e842','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6MSwidXNlcklkIjoxLCJ0b2tlbklkIjoiNDg3Mjc4ZTU5NTcyNGVhOTk1MGE3NzJlMWIxOGU4NDIiLCJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiaWF0IjoxNzExOTQwNTMyLCJleHAiOjE3MTE5NDc3MzIsImlzcyI6ImVhc3l1bXMgb2F1dGgifQ.XByF75-476_YHUN8Ilsjx02zIyhJd2yAfyhg--_dujM','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6MSwidXNlcklkIjoxLCJ0b2tlbklkIjoiNDg3Mjc4ZTU5NTcyNGVhOTk1MGE3NzJlMWIxOGU4NDIiLCJ0eXBlIjoicmVmcmVzaF90b2tlbiIsImlhdCI6MTcxMTk0MDUzMiwiZXhwIjoxNzEyNTQ1MzMyLCJpc3MiOiJlYXN5dW1zIG9hdXRoIn0.pL8arO_t6MJ8LMjLYtxhKOCy1qMemaK1t6nVNAFFN6U',1,'openid profile',1);
 /*!40000 ALTER TABLE `token` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -90,7 +89,7 @@ CREATE TABLE `user` (
   `state` tinyint(4) DEFAULT '1' COMMENT '1正常，2禁用',
   `introduction` mediumtext COMMENT '简介',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=5 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -112,4 +111,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-04-07  8:44:27
+-- Dump completed on 2024-04-11 20:39:28
