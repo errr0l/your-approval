@@ -1,14 +1,19 @@
 // 令牌服务（对应token表）
 const { pool } = require("../config/DBHelper");
 // const { client } = require("../config/redisHelper");
-
+const sqlMap = {
+    delToken: "delete from `token` where `id` = ?",
+    getTokenById: "select `id`, `access_token`, `refresh_token`, `scope`, `client_id`, `user_id` from `token` where `id` = ?",
+    getTokensByUserId: "select `id`, `access_token`, `refresh_token`, `scope`, `client_id`, `user_id` from `token` where `user_id` = ?",
+    save: "insert into `token` (`id`, `access_token`, `refresh_token`, `client_id`, `user_id`, `scope`) values (?, ?, ?, ?, ?, ?)",
+};
 /**
  * 获取token
  * @param {Number} id tokenId
  * @returns {Promise<*|null>}
  */
 async function getTokenById(id) {
-    const [rows] = await pool.query("select `id`, `access_token`, `refresh_token`, `scope`, `client_id`, `user_id` from `token` where `id` = ?", [id]);
+    const [rows] = await pool.query(sqlMap.getTokenById, [id]);
     return rows.length ? rows[0] : null;
 }
 
@@ -18,8 +23,7 @@ async function getTokenById(id) {
  * @returns {Promise<Array>}
  */
 async function getTokensByUserId(id) {
-    const sql = "select `id`, `access_token`, `refresh_token`, `scope`, `client_id`, `user_id` from `token` where `user_id` = ?";
-    const [rows] = await pool.query(sql, [id]);
+    const [rows] = await pool.query(sqlMap.getTokensByUserId, [id]);
     return rows;
 }
 
@@ -32,8 +36,7 @@ async function delTokensByUserId(id) {
 }
 
 async function delToken(token) {
-    const sql = "delete from `token` where `id` = ?";
-    const [result] = await pool.query(sql, [token.id]);
+    const [result] = await pool.query(sqlMap.delToken, [token.id]);
     return result.affectedRows === 1;
 }
 
@@ -44,11 +47,10 @@ async function delToken(token) {
  */
 async function save(tokenEntity) {
     const { id, userId, clientId, accessToken, refreshToken, scope } = tokenEntity;
-    const sql = "insert into `token` (`id`, `access_token`, `refresh_token`, `client_id`, `user_id`, `scope`) values (?, ?, ?, ?, ?, ?)";
-    const [result] = await pool.query(sql, [id, accessToken, refreshToken, clientId, userId, scope]);
+    const [result] = await pool.query(sqlMap.save, [id, accessToken, refreshToken, clientId, userId, scope]);
     return result.affectedRows === 1;
 }
 
 module.exports = {
-    getTokenById, getTokensByUserId, save, delTokensByUserId, delToken
+    getTokenById, getTokensByUserId, save, delTokensByUserId, delToken, sqlMap
 }

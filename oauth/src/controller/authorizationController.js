@@ -1,7 +1,7 @@
 // 认证相关
 const Router = require('koa-router');
 
-const { ACT_1, ACT_2, ID_TOKEN, REDIS_OK, AUTHORIZATION } = require("../../../common/src/constants/general");
+const { ACT_1, ACT_2, ID_TOKEN, REDIS_OK, AUTHORIZATION, REFRESH_TOKEN, INTERNAL_SERVER_ERROR, PARAM_POSITION_BODY } = require("../../../common/src/constants/general");
 const { joinUrl } = require("../../../common/src/util/urlUtil");
 const tokenService = require("../service/tokenService");
 const tokenUtil = require("../util/tokenGenerator");
@@ -17,6 +17,8 @@ const userService = require("../service/userService");
 const { client: redisClient } = require("../config/redisHelper");
 const { buildUserinfo } = require("../../../common/src/util/oidcUtil");
 const emailService = require("../service/emailService");
+const { handler: tokenHandler, tokenChecker } = require("../middleware/tokenChecker");
+const { pool, executeWithTransaction } = require("../config/DBHelper");
 
 const router = new Router({
     prefix: "/oauth2"
@@ -37,6 +39,64 @@ router.get("/register", async (ctx) => {
     await ctx.render("register");
 });
 
+// 撤销授权；同样需要客户端id和秘钥
+router.post('/revoke', paramChecker(patterns.revoke), async ctx => {
+    const req = ctx.request;
+    const { client_id: clientId } = req.body;
+    const client = await clientService.getClientById(clientId);
+    if (!client) {
+        throw new ClientException({ code: oauthErrors.UNKNOWN_CLIENT });
+    }
+    const { secret, id } = decodeClientCredentials(req.headers[AUTHORIZATION]);
+    // 校验客户端
+    if ((+id !== clientId) || (client.id !== clientId) || (client.secret !== secret)) {
+        throw new ClientException({ code: oauthErrors.INVALID_CLIENT });
+    }
+    await tokenService.delToken({ id });
+    await redisClient.del(id);
+    ctx.body = { error: '', message: "ok" };
+});
+
+// 验证token
+router.post('/verify', async (ctx) => {
+    const token = ctx.request.body.token;
+    const { decoded } = await tokenHandler(token, { saving: false, serializing: false });
+    ctx.body = { error: '', payload: decoded };
+});
+
+// 刷新token；
+// 刷新后。之前的访问令牌无法再次使用；
+router.post('/refresh', tokenChecker({ position: PARAM_POSITION_BODY, name: "token" }), async (ctx) => {
+    const token = ctx.request.token;
+    const { id, client_id: clientId, user_id: userId, scope } = token;
+    const tokenId = generateUuid();
+    // 重新颁发token，但不包括id_token；
+    // id_token需要每次重新认证
+    const tokenPayload = { clientId, userId, tokenId };
+    const accessToken = tokenUtil.generateToken(tokenPayload);
+    const refreshToken = tokenUtil.generateRefreshToken(tokenPayload);
+
+    const pms = [];
+    const conn = await pool.getConnection();
+    pms.push(conn.execute(tokenService.sqlMap.delToken, [id]));
+    pms.push(conn.execute(tokenService.sqlMap.save, [id, accessToken, refreshToken, clientId, userId, scope]));
+    const results = await executeWithTransaction(conn, pms);
+    console.log("执行结果：");
+    console.log(results);
+    if (!results.length) {
+        throw new CustomException({ code: INTERNAL_SERVER_ERROR, message: '刷新失败' });
+    }
+    ctx.body = {
+        error: '',
+        payload: {
+            access_token: accessToken,
+            refresh_token: refreshToken,
+            token_type: "bearer"
+        }
+    };
+});
+
+// get请求对应的是ums
 router.get("/logout", async (ctx) => {
     const user = ctx.session.user;
     if (user.id) {
@@ -148,7 +208,6 @@ router.get("/authorize", paramChecker(patterns.authorize, {
     await ctx.render('approval', tempData);
 });
 
-// 授权；
 // 用户可在授权页面上进行操作；
 router.post("/approve", paramChecker(patterns.approve), async (ctx, next) => {
     const { action, uuid, ...scopes } = ctx.request.body;
@@ -217,13 +276,15 @@ router.post("/token", paramChecker(patterns.token, {
     let respData;
     const scope = preReq.scopes.join(" "); // 将数组拆分为字符串
     const tokenId = generateUuid();
+    const tokenPayload = { clientId, userId: user.id, tokenId: tokenId };
+    const accessToken = tokenUtil.generateToken(tokenPayload);
+    const refreshToken = tokenUtil.generateRefreshToken(tokenPayload);
     if (grantType === grantTypes.AUTHORIZATION_TYPE) {
-        const tokenPayload = { clientId, userId: user.id, tokenId: tokenId };
         respData = {
             error: '',
             payload: {
-                access_token: tokenUtil.generateToken(tokenPayload),
-                refresh_token: tokenUtil.generateRefreshToken(tokenPayload),
+                access_token: accessToken,
+                refresh_token: refreshToken,
                 token_type: "bearer"
             }
         };
@@ -238,28 +299,29 @@ router.post("/token", paramChecker(patterns.token, {
         }
     }
 
-    try {
-        // 保证每个用户仅有一个token记录
-        const tokens = await tokenService.getTokensByUserId(user.id);
-        if (tokens.length) {
-            console.log("删除数据库中的token：");
-            const _token = tokens[0];
-            const results = await Promise.all([tokenService.delToken(_token), redisClient.del(_token.id)])
-                .catch(error => {
-                    console.log(error);
-                });
-            console.log(results);
-        }
-        const tokenEntity = {
-            id: tokenId,
-            accessToken: respData.payload.access_token,
-            refreshToken: respData.payload.refresh_token,
-            clientId, userId: user.id, scope: scope
-        };
-        await tokenService.save(tokenEntity);
-    } catch (error) {
-        console.log(error);
-        throw new CustomException();
+    // 保证每个用户仅有一个token记录
+    const tokens = await tokenService.getTokensByUserId(user.id);
+    const pms = [];
+    const conn = await pool.getConnection();
+    if (tokens.length) {
+        const _token = tokens[0];
+        pms.push(conn.execute(tokenService.sqlMap.delToken, [_token.id]));
+        console.log("删除数据库中的token：", _token);
+        const redisResp = await redisClient.del(_token.id);
+        console.log("redis删除结果：", redisResp);
+    }
+    const tokenEntity = {
+        id: tokenId,
+        accessToken,
+        refreshToken,
+        clientId, userId: user.id, scope: scope
+    };
+    pms.push(conn.execute(tokenService.sqlMap.save, [tokenEntity.id, tokenEntity.accessToken, tokenEntity.refreshToken, tokenEntity.clientId, tokenEntity.userId, tokenEntity.scope]));
+    const results = await executeWithTransaction(conn, pms);
+    console.log("执行结果：");
+    console.log(results);
+    if (!results.length) {
+        throw new CustomException({ code: INTERNAL_SERVER_ERROR });
     }
     return ctx.body = respData;
 });

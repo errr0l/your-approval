@@ -1,5 +1,5 @@
 // 数据库配置
-const { createPool } = require("../../../common/src/db/mysql");
+const { createPool, executeWithTransaction } = require("../../../common/src/db/mysql");
 
 const config = require("./appConfig");
 
@@ -13,5 +13,5 @@ const pool = createPool({
 });
 
 module.exports = {
-    pool
+    pool, executeWithTransaction
 };

@@ -2,7 +2,7 @@
 const Router = require('koa-router');
 const compose = require("koa-compose");
 
-const tokenChecker = require("../middleware/tokenChecker");
+const { tokenChecker } = require("../middleware/tokenChecker");
 const scopeChecker = require("../middleware/scopeChecker");
 const { buildUserinfo } = require("../../../common/src/util/oidcUtil");
 const userService = require("../service/userService");

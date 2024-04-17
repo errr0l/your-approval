@@ -1,7 +1,7 @@
 // jwt默认采用的是对称加密
 // 颁发的令牌需要签名（防篡改）
 // jsonwebtoken这个库，使用最新版（9.0.2）使用公钥进行校验时，会有错误；降到8.5.1正常
-const { generate } = require("../../../common/src/util/tokenUtil");
+const { generate, verify } = require("../../../common/src/util/tokenUtil");
 const fs = require("fs");
 
 const config = require("../config/appConfig");
@@ -41,5 +41,5 @@ function generateIdToken(payload={}) {
 }
 
 module.exports = {
-    generateToken, generateRefreshToken, generateIdToken
+    generateToken, generateRefreshToken, generateIdToken, verify
 };

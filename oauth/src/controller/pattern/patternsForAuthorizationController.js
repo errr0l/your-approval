@@ -1,5 +1,5 @@
 // 以模块区分
-const { ACT_1, ACT_2 } = require("../../../../common/src/constants/general");
+const { ACT_1, ACT_2, PARAM_POSITION_BODY, PARAM_POSITION_HEADER, PARAM_POSITION_QUERY, AUTHORIZATION } = require("../../../../common/src/constants/general");
 const { responseTypes, grantTypes } = require("../../constants/oauth");
 const config = require("../../config/appConfig");
 const { openidRule } = require("../../../../common/src/util/oidcUtil");
@@ -9,7 +9,7 @@ const { scopes: oidcScopes } = require("../../../../common/src/constants/oidc");
 // 当然，不以这种方式来校验也是可以的，只是说使用这种校验形式可以使得业务代码更集中;
 // 重新考虑了一下，虽然js可以轻易做到在任何地方做校验，但其他语言可能不行，所以有些校验应该放在业务层，这里只校验一些静态规则；
 const authorize = [{
-    position: "query",
+    position: PARAM_POSITION_QUERY,
     rules: [{
         name: "response_type",
         validator: (value, _this, ctx) => {
@@ -72,7 +72,7 @@ const authorize = [{
 }];
 
 const approve = [{
-    position: "body",
+    position: PARAM_POSITION_BODY,
     rules: [{
         name: "uuid",
         required: true,
@@ -94,7 +94,7 @@ const approve = [{
 }];
 
 const token = [{
-    position: "body",
+    position: PARAM_POSITION_BODY,
     rules: [{
         name: "grant_type",
         required: true,
@@ -123,48 +123,36 @@ const token = [{
         required: true,
     }]
 }, {
-    position: "header",
+    position: PARAM_POSITION_HEADER,
     rules: [{
-        name: "authorization",
+        name: AUTHORIZATION,
         required: true,
     }]
 }];
 
 const login = [{
-    position: "body",
+    position: PARAM_POSITION_BODY,
     rules: [{
         name: "username",
         required: true,
-    }]
-}, {
-    position: "body",
-    rules: [{
+    }, {
         name: "password",
         required: true,
-    }]
-}, {
-    position: "body",
-    rules: [{
+    }, {
         name: "query",
         required: true,
     }]
 }];
 
 const register = [{
-    position: "body",
+    position: PARAM_POSITION_BODY,
     rules: [{
         name: "username",
         required: true,
-    }]
-}, {
-    position: "body",
-    rules: [{
+    }, {
         name: "password",
         required: true,
-    }]
-}, {
-    position: "body",
-    rules: [{
+    }, {
         name: "password2",
         validator(value, _this, ctx) {
             const errors = [];
@@ -178,10 +166,7 @@ const register = [{
             }
             return errors;
         }
-    }]
-}, {
-    position: "body",
-    rules: [{
+    }, {
         name: "email",
         required: true,
         validator(value, _this, ctx) {
@@ -196,15 +181,35 @@ const register = [{
             }
             return errors;
         }
-    }]
-}, {
-    position: "body",
-    rules: [{
+    }, {
         name: "code",
         required: true
     }]
 }];
 
+const verify = [{
+    position: PARAM_POSITION_BODY,
+    rules: [{
+        name: "token",
+        required: true
+    }]
+}];
+
+const revoke = [{
+    position: PARAM_POSITION_HEADER,
+    rules: [{
+        name: AUTHORIZATION,
+        required: true
+    }]
+}, {
+    position: PARAM_POSITION_BODY,
+    rules: [{
+        name: "client_id",
+        required: true
+    }]
+}];
+
 module.exports = {
-    authorize: authorize, approve: approve, token: token, login: login, register: register, emailRule
+    authorize: authorize, approve: approve, token: token, login: login, register: register, emailRule,
+    verify, revoke
 }

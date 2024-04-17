@@ -1,5 +1,5 @@
 // 数据库配置
-const mysql = require("mysql2/promise");
+const { createPool: cp, PoolConnection } = require("mysql2/promise");
 
 /**
  * 创建连接池
@@ -12,7 +12,7 @@ const mysql = require("mysql2/promise");
  * @return {Object}
  */
 function createPool(options) {
-    return mysql.createPool({
+    return cp({
         user: options.user,
         password: options.password,
         database: options.database,
@@ -21,6 +21,33 @@ function createPool(options) {
     });
 }
 
+/**
+ * 执行事务；
+ * 如果返回空数组，则表示出现异常；
+ * @param {PoolConnection} conn 数据库连接对象
+ * @param {Array} pms 执行sql语句的promise数组
+ * @return {Promise<*[]>}
+ */
+async function executeWithTransaction(conn, pms) {
+    let result = [];
+    try {
+        await conn.beginTransaction();
+        result = await Promise.all(pms);
+        await conn.commit();
+    } catch (error) {
+        console.error('执行事务失败：', error);
+        try {
+            await conn.rollback(); // 回滚事务
+        } catch (rollbackError) {
+            console.error('回滚失败：', rollbackError);
+        }
+    } finally {
+        // 释放连接
+        conn.release();
+    }
+    return result;
+}
+
 module.exports = {
-    createPool
+    createPool, executeWithTransaction
 };
