@@ -58,7 +58,7 @@ router.post('/revoke', paramChecker(patterns.revoke), async ctx => {
 });
 
 // 验证token
-router.post('/verify', async (ctx) => {
+router.post('/verify', paramChecker(patterns.verify), async (ctx) => {
     const token = ctx.request.body.token;
     const { decoded } = await tokenHandler(token, { saving: false, serializing: false });
     ctx.body = { error: '', payload: decoded };

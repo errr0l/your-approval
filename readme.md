@@ -148,13 +148,13 @@ App running at：
 
 （若无其他额外说明，GET请求方法的参数默认拼接在请求路径之后）
 
-| 参数 | 参数值 | 描述 | 必填 | 说明 |
-| ---- | ---- | ---- | ---- | ---- | 
-| response_type | code | 响应类型 | 是 | 固定值 |
-| redirect_uri | | 重定向地址 | 是 | 必须包含在客户端的重定向地址中 |
-| client_id | | 客户端id | 是 |  |
-| scope | openid,profile,email,address | 权限范围 | 是 | 以空格分开 |
-| state |  | 状态 | 否 | 随机值；如果传输时，服务器会原路返回 |
+| 参数 | 必填 | 说明 |
+| ---- | ---- | ---- | 
+| response_type | 是 | 响应类型；code  |
+| redirect_uri | 是 | 重定向地址；必须包含在客户端的重定向地址中 |
+| client_id | 是 | 客户端id |
+| scope | 是 | 权限范围；openid,profile,email,address；多个参数以空格分开 |
+| state | 否 | 状态；该值为随机值，如果传输时，服务器会原路返回 |
 
 响应数据：
 
@@ -170,19 +170,19 @@ App running at：
 
 请求头：
 
-| 参数 | 参数值 | 描述 | 必填 | 说明 |
-| ---- | ---- | ---- | ---- | ---- |
-| Authorization | Basic base64(client_id:client_secret) | 认证信息 | 是 | id和secret中间使用":"分隔，进行base64编码后传输 |
-| Content-type | application/json | 内容类型 | 是 |  |
+| 参数 | 必填 | 说明 |
+| ---- | ---- | ---- |
+| Authorization | 是 | 认证信息；格式为：Basic base64(client_id:client_secret)，id和secret中间使用":"分隔，进行base64编码后传输 |
+| Content-type | 是 | 内容类型；application/json |
 
 请求参数：
 
-| 参数 | 参数值 | 描述 | 必填 | 说明 |
-| ---- | ---- | ---- | ---- | ---- | 
-| grant_type | authorization_type | 授权方式 | 是 |  |
-| redirect_uri | | 重定向地址 | 是 | 必须包含在客户端的重定向地址中 |
-| client_id | | 客户端id | 是 |  |
-| code | | 授权码 | 是 |  |
+| 参数 | 必填 | 说明 |
+| ---- | ---- | ---- | 
+| grant_type | 是 | 授权方式；authorization_type |
+| redirect_uri | 是 | 重定向地址；必须包含在客户端的重定向地址中 |
+| client_id | 是 | 客户端id |
+| code | 是 | 授权码 |
 
 响应数据：
 
@@ -194,6 +194,38 @@ App running at：
         "refresh_token": "",
         "token_type": "bearer",
         "id_token": ""
+    }
+}
+```
+
+#### 1.3、验证令牌
+
+> /oauth2/verify
+
+请求方法：POST
+
+请求头：
+
+| 参数 | 必填 | 说明 |
+| ---- | ---- | ---- |
+| Content-type | 是 | 内容类型；application/json |
+
+请求参数：
+
+| 参数 | 必填 | 说明 |
+| ---- | ---- | ---- |
+| token | 是 | 令牌 |
+
+响应数据：
+
+```json
+{
+    "error": "",
+    "payload": {
+        "clientId": "",
+        "userId": "",
+        "tokenId": "",
+        "...": ""
     }
 }
 ```
