@@ -136,7 +136,7 @@ App running at：
 
 *以下是面向客户端的接口。*
 
-#### 1.1、授权（获取授权码）
+#### 1.1、获取授权码
 
 > /oauth2/authorize
 
@@ -148,7 +148,7 @@ App running at：
 
 （若无其他额外说明，GET请求方法的参数默认拼接在请求路径之后）
 
-| 参数 | 必填 | 说明 |
+| 名称 | 必填 | 说明 |
 | ---- | ---- | ---- | 
 | response_type | 是 | 响应类型；code  |
 | redirect_uri | 是 | 重定向地址；必须包含在客户端的重定向地址中 |
@@ -170,14 +170,14 @@ App running at：
 
 请求头：
 
-| 参数 | 必填 | 说明 |
+| 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
 | Authorization | 是 | 认证信息；格式为：Basic base64(client_id:client_secret)，id和secret中间使用":"分隔，进行base64编码后传输 |
 | Content-type | 是 | 内容类型；application/json |
 
 请求参数：
 
-| 参数 | 必填 | 说明 |
+| 名称 | 必填 | 说明 |
 | ---- | ---- | ---- | 
 | grant_type | 是 | 授权方式；authorization_type |
 | redirect_uri | 是 | 重定向地址；必须包含在客户端的重定向地址中 |
@@ -198,7 +198,38 @@ App running at：
 }
 ```
 
-#### 1.3、验证令牌
+#### 1.3、刷新令牌
+
+> /oauth2/refresh
+
+请求方法：POST
+
+请求头：
+
+| 名称 | 必填 | 说明 |
+| ---- | ---- | ---- |
+| Content-type | 是 | 内容类型；application/json |
+
+请求参数：
+
+| 名称 | 必填 | 说明 |
+| ---- | ---- | ---- | 
+| token | 是 | 刷新令牌；格式为：Bearer token |
+
+响应数据：
+
+```json
+{
+    "error": "",
+    "payload": {
+        "access_token": "",
+        "refresh_token": "",
+        "token_type": "bearer"
+    }
+}
+```
+
+#### 1.4、验证令牌
 
 > /oauth2/verify
 
@@ -206,13 +237,13 @@ App running at：
 
 请求头：
 
-| 参数 | 必填 | 说明 |
+| 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
 | Content-type | 是 | 内容类型；application/json |
 
 请求参数：
 
-| 参数 | 必填 | 说明 |
+| 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
 | token | 是 | 令牌 |
 
@@ -229,6 +260,73 @@ App running at：
     }
 }
 ```
+
+#### 1.5、撤销授权
+
+> /oauth2/revoke
+
+请求方法：POST
+
+请求头：
+
+| 名称 | 必填 | 说明 |
+| ---- | ---- | ---- |
+| Authorization | 是 | 认证信息；格式为：Basic base64(client_id:client_secret)，id和secret中间使用":"分隔，进行base64编码后传输 |
+| Content-type | 是 | 内容类型；application/json |
+
+请求参数：
+
+| 名称 | 必填 | 说明 |
+| ---- | ---- | ---- |
+| client_id | 是 | 客户端id |
+
+响应数据：
+
+```json
+{
+    "error": "",
+    "message": ""
+}
+```
+
+#### 1.6、获取用户信息
+
+> /oauth2/userinfo
+
+接口返回的信息根据用户授权的情况而定；
+
+请求方法：GET
+
+请求头：
+
+| 名称 | 必填 | 说明 |
+| ---- | ---- | ---- |
+| Authorization | 是 | 认证信息；格式为：Bearer token；token为刷新令牌 |
+| Content-type | 是 | 内容类型；application/json |
+
+响应数据：
+
+```json
+{
+    "error": "",
+    "payload": {
+        "id": "",
+        "username": "",
+        "avatar": "",
+        "introduction": "",
+        "email": "",
+        "...": ""
+    }
+}
+```
+
+### 2、授权服务器向
+
+> ./server_api.md
+
+[server_api.md](server_api.md)
+
+考虑到授权服务器的接口相对来说不是很重要，因此存放于单独的文件中。
 
 ## 五、错误码对照列表
 
