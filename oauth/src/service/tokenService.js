@@ -40,6 +40,13 @@ async function delToken(token) {
     return result.affectedRows === 1;
 }
 
+async function update(tokenEntity) {
+    const { id, accessToken, refreshToken } = tokenEntity;
+    const sql = "update `token` set `access_token` = ?, `refresh_token` = ? where `id` = ?";
+    const [result] = await pool.query(sql, [accessToken, refreshToken, id]);
+    return result.affectedRows === 1;
+}
+
 /**
  * 保存token
  * @param {Object} tokenEntity token实体对象
@@ -52,5 +59,5 @@ async function save(tokenEntity) {
 }
 
 module.exports = {
-    getTokenById, getTokensByUserId, save, delTokensByUserId, delToken, sqlMap
+    getTokenById, getTokensByUserId, save, delTokensByUserId, delToken, sqlMap, update
 }

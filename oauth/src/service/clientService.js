@@ -1,7 +1,8 @@
 const { pool } = require("../config/DBHelper");
 
 /**
- * @param {Number} id 客户端id
+ * 获取客户端
+ * @param id 客户端id
  * @param id
  * @returns {Promise<Object|null>}
  */

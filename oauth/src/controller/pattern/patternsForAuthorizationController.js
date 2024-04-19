@@ -196,15 +196,9 @@ const verify = [{
 }];
 
 const revoke = [{
-    position: PARAM_POSITION_HEADER,
-    rules: [{
-        name: AUTHORIZATION,
-        required: true
-    }]
-}, {
     position: PARAM_POSITION_BODY,
     rules: [{
-        name: "client_id",
+        name: "credential",
         required: true
     }]
 }];

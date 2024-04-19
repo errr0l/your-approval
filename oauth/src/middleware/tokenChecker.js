@@ -18,7 +18,10 @@ const config = require("../config/appConfig");
  */
 async function handler(token, opts = {}) {
     const { saving = true, serializing = true, target = ACCESS_TOKEN } = opts;
+    console.log('token：', token);
+    console.log('secret：', config.jwt.secret);
     const decoded = verify(token, config.jwt.secret); // 该token的类型是访问令牌
+    console.log('decoded：', decoded);
     if (!decoded || (decoded.type !== target)) {
         throw new ClientException({ code: oauthErrors.INVALID_TOKEN });
     }

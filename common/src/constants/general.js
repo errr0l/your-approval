@@ -37,4 +37,5 @@ module.exports = {
     CODE_403: 403,
     CODE_500: 500,
     SESSION_TOKEN: "session_token", // (easyums-oauth)与session_id类似，但过期时间较长，其属性值保存与redis中
+    MESSAGE_1: 'ok'
 };

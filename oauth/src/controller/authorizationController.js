@@ -1,7 +1,8 @@
 // 认证相关
 const Router = require('koa-router');
+const compose = require("koa-compose");
 
-const { ACT_1, ACT_2, ID_TOKEN, REDIS_OK, AUTHORIZATION, REFRESH_TOKEN, INTERNAL_SERVER_ERROR, PARAM_POSITION_BODY } = require("../../../common/src/constants/general");
+const { ACT_1, ACT_2, ID_TOKEN, REDIS_OK, AUTHORIZATION, INTERNAL_SERVER_ERROR, PARAM_POSITION_BODY, MESSAGE_1 } = require("../../../common/src/constants/general");
 const { joinUrl } = require("../../../common/src/util/urlUtil");
 const tokenService = require("../service/tokenService");
 const tokenUtil = require("../util/tokenGenerator");
@@ -40,21 +41,29 @@ router.get("/register", async (ctx) => {
 });
 
 // 撤销授权；同样需要客户端id和秘钥
-router.post('/revoke', paramChecker(patterns.revoke), async ctx => {
+router.post('/revoke', compose([tokenChecker(), paramChecker(patterns.revoke)]), async ctx => {
     const req = ctx.request;
-    const { client_id: clientId } = req.body;
-    const client = await clientService.getClientById(clientId);
+    const { credential } = req.body;
+    const { secret: clientSecret, id: clientId } = decodeClientCredentials(credential);
+    console.log("credential：id->%s, secret->%s", clientId, clientSecret);
+    let client;
+    if (clientId) {
+        client = await clientService.getClientById(clientId);
+    }
+
     if (!client) {
         throw new ClientException({ code: oauthErrors.UNKNOWN_CLIENT });
     }
-    const { secret, id } = decodeClientCredentials(req.headers[AUTHORIZATION]);
-    // 校验客户端
-    if ((+id !== clientId) || (client.id !== clientId) || (client.secret !== secret)) {
+
+    if (clientSecret !== client.secret) {
         throw new ClientException({ code: oauthErrors.INVALID_CLIENT });
     }
-    await tokenService.delToken({ id });
-    await redisClient.del(id);
-    ctx.body = { error: '', message: "ok" };
+    const token = req.token;
+    const tokenId = token.id;
+    const results = await Promise.all([tokenService.delToken(token), redisClient.del(tokenId)]);
+    console.log("执行结果：");
+    console.log(results);
+    ctx.body = { error: '', message: MESSAGE_1 };
 });
 
 // 验证token
@@ -68,19 +77,17 @@ router.post('/verify', paramChecker(patterns.verify), async (ctx) => {
 // 刷新后。之前的访问令牌无法再次使用；
 router.post('/refresh', tokenChecker({ position: PARAM_POSITION_BODY, name: "token" }), async (ctx) => {
     const token = ctx.request.token;
-    const { id, client_id: clientId, user_id: userId, scope } = token;
-    const tokenId = generateUuid();
+    const { id, client_id: clientId, user_id: userId } = token;
     // 重新颁发token，但不包括id_token；
     // id_token需要每次重新认证
-    const tokenPayload = { clientId, userId, tokenId };
+    const tokenPayload = { clientId, userId, tokenId: id };
     const accessToken = tokenUtil.generateToken(tokenPayload);
     const refreshToken = tokenUtil.generateRefreshToken(tokenPayload);
 
-    const pms = [];
-    const conn = await pool.getConnection();
-    pms.push(conn.execute(tokenService.sqlMap.delToken, [id]));
-    pms.push(conn.execute(tokenService.sqlMap.save, [id, accessToken, refreshToken, clientId, userId, scope]));
-    const results = await executeWithTransaction(conn, pms);
+    const tokenEntity = {
+        id, accessToken, refreshToken
+    };
+    const results = await Promise.all([tokenService.update(tokenEntity), redisClient.del(id)]);
     console.log("执行结果：");
     console.log(results);
     if (!results.length) {
