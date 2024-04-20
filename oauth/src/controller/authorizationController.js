@@ -2,7 +2,7 @@
 const Router = require('koa-router');
 const compose = require("koa-compose");
 
-const { ACT_1, ACT_2, ID_TOKEN, REDIS_OK, AUTHORIZATION, INTERNAL_SERVER_ERROR, PARAM_POSITION_BODY, MESSAGE_1 } = require("../../../common/src/constants/general");
+const { ACT_1, ACT_2, ID_TOKEN, REDIS_OK, AUTHORIZATION, INTERNAL_SERVER_ERROR, REFRESH_TOKEN, PARAM_POSITION_BODY, MESSAGE_1 } = require("../../../common/src/constants/general");
 const { joinUrl } = require("../../../common/src/util/urlUtil");
 const tokenService = require("../service/tokenService");
 const tokenUtil = require("../util/tokenGenerator");
@@ -75,14 +75,29 @@ router.post('/verify', paramChecker(patterns.verify), async (ctx) => {
 
 // 刷新token；
 // 刷新后。之前的访问令牌无法再次使用；
-router.post('/refresh', tokenChecker({ position: PARAM_POSITION_BODY, name: "token" }), async (ctx) => {
-    const token = ctx.request.token;
+router.post('/refresh',
+    tokenChecker({
+        handlerOpts: {
+            target: REFRESH_TOKEN, saving: false, serializing: false
+        }
+    }),
+    async (ctx) => {
+    const token = ctx.request.token; // 刷新令牌
     const { id, client_id: clientId, user_id: userId } = token;
+    const tokenDecoded = ctx.request.tokenDecoded; // 刷新令牌解析结果
     // 重新颁发token，但不包括id_token；
     // id_token需要每次重新认证
     const tokenPayload = { clientId, userId, tokenId: id };
     const accessToken = tokenUtil.generateToken(tokenPayload);
-    const refreshToken = tokenUtil.generateRefreshToken(tokenPayload);
+    // 临近过期时，重新生成
+    let refreshToken;
+    console.log("token -> ", token);
+    if ((tokenDecoded.exp - Date.now() / 1000) < 60 * 60 * 24) {
+        refreshToken = tokenUtil.generateRefreshToken(tokenPayload);
+    }
+    else {
+        refreshToken = token.refresh_token;
+    }
 
     const tokenEntity = {
         id, accessToken, refreshToken

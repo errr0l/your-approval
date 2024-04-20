@@ -30,11 +30,12 @@ async function handler(token, opts = {}) {
     let _token;
     if (!(_token = await redisClient.get(tokenId))) {
         _token = await tokenService.getTokenById(decoded.tokenId);
-        if (!_token) {
+        // target对应数据库字段
+        if (!_token || _token[target] !== token) {
             throw new ClientException({ code: oauthErrors.INVALID_TOKEN });
         }
         if (saving) {
-            redisClient.set(tokenId, JSON.stringify(_token), "EX", decoded.exp).then(res => {
+            redisClient.set(tokenId, JSON.stringify(_token), "EX", 7200).then(res => {
                 if (res === REDIS_OK) {
                     console.log("redis 保存成功：token_id = %s", tokenId);
                 }
@@ -59,11 +60,12 @@ async function handler(token, opts = {}) {
  * @param {Object} opts
  * @param opts.position
  * @param opts.name
+ * @param opts.handlerOpts
  * @return {(function(*, *): Promise<*>)|*}
  */
 function tokenChecker(opts = {}) {
     return async function (ctx, next) {
-        const { position = PARAM_POSITION_HEADER, name = AUTHORIZATION } = opts;
+        const { position = PARAM_POSITION_HEADER, name = AUTHORIZATION, handlerOpts } = opts;
         const prefix = BEARER;
         let value;
         if (position === PARAM_POSITION_HEADER) {
@@ -82,7 +84,7 @@ function tokenChecker(opts = {}) {
         }
 
         const token = value.replace(prefix, "");
-        const { decoded, token: _token } = await handler(token);
+        const { decoded, token: _token } = await handler(token, handlerOpts);
         ctx.request.tokenDecoded = decoded;
         ctx.request.token = _token;
         await next();
