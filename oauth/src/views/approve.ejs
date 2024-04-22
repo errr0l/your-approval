@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <title>easyums - approval</title>
+    <title>approval</title>
     <link rel="stylesheet" href="/css/layout1.css" />
 </head>
 <body>
@@ -11,7 +11,11 @@
             <%- include('partial/p1.ejs'); -%>
         </div>
         <div class="right">
+            <% if (user) { %>
             <div class="title">APPROVAL</div>
+            <% } else { %>
+            <div class="title">LOGIN</div>
+            <% } %>
             <div>
                 <% if (!user) { %>
                 <form class="form" action="/oauth2/login" method="POST">

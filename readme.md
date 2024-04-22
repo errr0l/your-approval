@@ -1,30 +1,30 @@
-# EASYUMS
+# Your Approval
 
-easyums为一个基于OAuth2.0的简易用户管理&授权系统，旨在为用户提供一种安全、高效的方式来管理自己的账号资源，表现在以下几个方面。
+一个基于OAuth2.0的简易授权系统，旨在为用户提供一种安全、高效的方式来管理自己的账号资源，表现在以下几个方面。
 
 + 自主授权
 
-  当第三方系统应用向用户申请获取资源时，用户可选择同意或拒绝申请，而无需向其提供账号信息（如账号、密码）。
+  当第三方系统应用向用户申请授权时，用户可同意或拒绝申请，而无需向其提供账号信息（如账号、密码）。
 
 + 统一信息管理
 
-  easyums可向第三方应用提供基本&公开的用户数据，可减少用户在注册账号时需要填写的表单信息。
+  （经授权后）系统可向第三方应用提供基本&公开的用户数据，减少在注册账号时需要填写的表单信息。
 
 + 统一认证服务
   
-    用户可通过easyums登录到第三方应用，有效解决了忘记账号密码的难题。
+  用户可通过本系统登录到第三方应用，有效解决了忘记账号密码的难题。
 
-easyums是现今多应用、多账号体系下的一个解决方案。
+Your Approval是现今多应用、多账号体系下的一个解决方案。
 
-![image](./oauth/static/image/74e952357d2de05e03cabba7aa949d30.png)
+![image](./oauth/static/image/A29263E2452C02F752243359E3BAB76C.png)
 
 *图1 系统截图1*
 
-![image](./oauth/static/image/40c622c400a7708181999d2c7a8b8463.png)
+![image](./oauth/static/image/88B4E783EC9ECF9DD767291D1718751A.png)
 
 *图2 系统截图2*
 
-![image](./oauth/static/image/375e123b1a8f208900706b6305dcba58.png)
+![image](./oauth/static/image/E46CCF725EA03911A5D4CC7DE1F4F76F.png)
 
 *图3 系统截图3*
 
@@ -52,7 +52,7 @@ host=localhost
 port=3306
 user=root
 password=
-db_name=easyums
+db_name=your-approval
 
 [redis]
 host=localhost
@@ -94,7 +94,7 @@ rsa_primary_key=/your/path/rsa_private_key.pem
 
 在数据库中执行以下sql文件，生成数据表。
 
-> oauth/easyums.sql
+> oauth/your-approval.sql
 
 4、创建客户端
 
@@ -128,7 +128,7 @@ App running at：
 
 以下仅提供了基于js的代码，对于js以外的语言，其实也是大同小异，如有需要还请自行实现。
 
-> https://github.com/xxzhiwei/demo/tree/master/easyums-demo
+> https://github.com/xxzhiwei/demo/tree/master/your-approval-demo
 
 ## 四、接口列表
 

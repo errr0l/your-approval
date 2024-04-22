@@ -1,7 +1,7 @@
 {
-    "name": "easyums-common",
+    "name": "common",
     "version": "1.0.0",
-    "description": "简易的用户管理系统，基于oauth2构建，主要用于不同系统之间的用户信息共享。",
+    "description": "",
     "main": "",
     "scripts": {
         "test": "echo \"Error: no test specified\" && exit 1"

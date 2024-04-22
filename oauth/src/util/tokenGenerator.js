@@ -12,7 +12,7 @@ function generateToken(payload) {
     // 标出类型，以防止使用refresh_token当做access_token使用的问题
     payload['type'] = ACCESS_TOKEN;
     const opts = {
-        issuer: "easyums oauth",
+        issuer: config.server.name,
         expiresIn: config.jwt.access_token_expires_in,
     };
     return generate(payload, config.jwt.secret, opts);
@@ -21,7 +21,7 @@ function generateToken(payload) {
 function generateRefreshToken(payload={}) {
     payload['type'] = REFRESH_TOKEN;
     const opts = {
-        issuer: "easyums oauth",
+        issuer: config.server.name,
         expiresIn: config.jwt.refresh_token_expires_in,
     };
     return generate(payload, config.jwt.secret, opts);
@@ -33,7 +33,7 @@ function generateIdToken(payload={}) {
         rsaPrimaryKey = fs.readFileSync(config.jwt.rsa_primary_key, { encoding: 'utf-8'});
     }
     const opts = {
-        issuer: "easyums oauth",
+        issuer: config.server.name,
         expiresIn: config.jwt.id_token_expires_in,
         algorithm: 'RS256'
     };

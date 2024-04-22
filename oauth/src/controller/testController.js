@@ -14,7 +14,7 @@ const { codeStore, requestStore } = require("../store");
 const router = new Router({ prefix: "/test" });
 
 router.get("/", async (ctx) => {
-    await ctx.render("welcome to easyums.");
+    await ctx.render("welcome to your-approval.");
 });
 
 // 获取微信小程序用户信息（登陆？）；

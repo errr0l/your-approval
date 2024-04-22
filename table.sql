@@ -1,6 +1,6 @@
 -- MySQL dump 10.13  Distrib 5.7.34, for osx10.16 (x86_64)
 --
--- Host: localhost    Database: easyums
+-- Host: localhost    Database: your-approval
 -- ------------------------------------------------------
 -- Server version	5.7.34
 
@@ -89,7 +89,7 @@ CREATE TABLE `user` (
   `state` tinyint(4) DEFAULT '1' COMMENT '1正常，2禁用',
   `introduction` mediumtext COMMENT '简介',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB AUTO_INCREMENT=7 DEFAULT CHARSET=utf8;
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
 
 --
@@ -98,7 +98,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (4,'测试用户1','202cb962ac59075b964b07152d234b70','','2024-04-04 13:48:01.349','2444016558@qq.com',1,'');
+INSERT INTO `user` VALUES (1,'errol','e10adc3949ba59abbe56e057f20f883e','','2024-04-22 20:12:55.452','2444016558@qq.com',1,'');
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -111,4 +111,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-04-11 20:39:28
+-- Dump completed on 2024-04-22 20:16:13

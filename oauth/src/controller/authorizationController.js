@@ -2,7 +2,7 @@
 const Router = require('koa-router');
 const compose = require("koa-compose");
 
-const { ACT_1, ACT_2, ID_TOKEN, REDIS_OK, AUTHORIZATION, INTERNAL_SERVER_ERROR, REFRESH_TOKEN, PARAM_POSITION_BODY, MESSAGE_1 } = require("../../../common/src/constants/general");
+const { ACT_1, ACT_2, ID_TOKEN, REDIS_OK, AUTHORIZATION, INTERNAL_SERVER_ERROR, REFRESH_TOKEN, MESSAGE_1 } = require("../../../common/src/constants/general");
 const { joinUrl } = require("../../../common/src/util/urlUtil");
 const tokenService = require("../service/tokenService");
 const tokenUtil = require("../util/tokenGenerator");
@@ -118,7 +118,6 @@ router.post('/refresh',
     };
 });
 
-// get请求对应的是ums
 router.get("/logout", async (ctx) => {
     const user = ctx.session.user;
     if (user.id) {
@@ -227,7 +226,7 @@ router.get("/authorize", paramChecker(patterns.authorize, {
     else {
         tempData = { user: null, query: JSON.stringify(req.query) };
     }
-    await ctx.render('approval', tempData);
+    await ctx.render('approve', tempData);
 });
 
 // 用户可在授权页面上进行操作；

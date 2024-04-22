@@ -12,7 +12,12 @@ const configFilePath = rootDir + path.sep + appMeta.configName;
 if (!fs.existsSync(configFilePath)) {
     throw new Error(appMeta.configName + "配置文件不存在");
 }
+
 const appConfig = parse(fs.readFileSync(configFilePath, { encoding: 'utf-8' }));
+
+if (!fs.existsSync(appConfig.jwt.rsa_primary_key)) {
+    throw new Error(appConfig.jwt.rsa_primary_key + "不存在，请输入正确的路径（若未生成秘钥时，请执行oauth/script/generateKeyPair.js脚本）");
+}
 
 appConfig.rootDir = rootDir;
 

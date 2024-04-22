@@ -9,7 +9,7 @@
 //
 // const logger = pino({
 //     level: "info",
-//     name: "EASYUMS"
+//     name: ""
 // });
 //
 // module.exports = {
