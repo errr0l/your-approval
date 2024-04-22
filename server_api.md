@@ -14,9 +14,9 @@
 
 | 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
-| username | 是 | 用户名 |
-| password | 是 | 密码 |
-| query | 是 | 客户端携带的url参数；由服务器填充 |
+| username | &nbsp;&nbsp;是&nbsp;&nbsp; | 用户名 |
+| password | &nbsp;&nbsp;是&nbsp;&nbsp; | 密码 |
+| query | &nbsp;&nbsp;是&nbsp;&nbsp; | 客户端携带的url参数；由服务器填充 |
 
 响应数据：
 
@@ -34,17 +34,17 @@
 
 | 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
-| Content-type | 是 | 内容类型；application/json |
+| Content-type | &nbsp;&nbsp;是&nbsp;&nbsp; | 内容类型；application/json |
 
 请求参数：
 
 | 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
-| username | 是 | 用户名 |
-| password | 是 | 密码 |
-| password2 | 是 | 确认密码 |
-| email | 是 | 邮箱 |
-| code | 是 | 邮箱验证码 |
+| username | &nbsp;&nbsp;是&nbsp;&nbsp; | 用户名 |
+| password | &nbsp;&nbsp;是&nbsp;&nbsp; | 密码 |
+| password2 | &nbsp;&nbsp;是&nbsp;&nbsp; | 确认密码 |
+| email | &nbsp;&nbsp;是&nbsp;&nbsp; | 邮箱 |
+| code | &nbsp;&nbsp;是&nbsp;&nbsp; | 邮箱验证码 |
 
 响应数据：
 
@@ -77,9 +77,9 @@
 
 | 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
-| action | 是 | 提交动作；1同意,2拒绝 |
-| uuid | 是 | 请求标识 |
-| scope_* | 否 | 权限范围；*表示权限范围具有多个 |
+| action | &nbsp;&nbsp;是&nbsp;&nbsp; | 提交动作；1同意,2拒绝 |
+| uuid | &nbsp;&nbsp;是&nbsp;&nbsp; | 请求标识 |
+| scope_* | &nbsp;&nbsp;是&nbsp;&nbsp; | 权限范围；*表示权限范围具有多个 |
 
 响应数据：
 
@@ -98,13 +98,13 @@
 
 | 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
-| Content-type | 是 | 内容类型；application/json |
+| Content-type | &nbsp;&nbsp;是&nbsp;&nbsp; | 内容类型；application/json |
 
 请求参数：
 
 | 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
-| email | 是 | 邮箱 |
+| email | &nbsp;&nbsp;是&nbsp;&nbsp; | 邮箱 |
 
 响应数据：
 

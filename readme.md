@@ -94,7 +94,7 @@ rsa_primary_key=/your/path/rsa_private_key.pem
 
 在数据库中执行以下sql文件，生成数据表。
 
-> oauth/your-approval.sql
+> oauth/table.sql
 
 4、创建客户端
 
@@ -150,11 +150,11 @@ App running at：
 
 | 名称 | 必填 | 说明 |
 | ---- | ---- | ---- | 
-| response_type | 是 | 响应类型；code  |
-| redirect_uri | 是 | 重定向地址；必须包含在客户端的重定向地址中 |
-| client_id | 是 | 客户端id |
-| scope | 是 | 权限范围；openid,profile,email,address；多个参数以空格分开 |
-| state | 否 | 状态；该值为随机值，如果传输时，服务器会原路返回 |
+| response_type | &nbsp;&nbsp;是&nbsp;&nbsp; | 响应类型；code  |
+| redirect_uri | &nbsp;&nbsp;是&nbsp;&nbsp; | 重定向地址；必须包含在客户端的重定向地址中 |
+| client_id | &nbsp;&nbsp;是&nbsp;&nbsp; | 客户端id |
+| scope | &nbsp;&nbsp;是&nbsp;&nbsp; | 权限范围；openid,profile,email,address；多个参数以空格分开 |
+| state | &nbsp;&nbsp;是&nbsp;&nbsp; | 状态；该值为随机值，如果传输时，服务器会原路返回 |
 
 响应数据：
 
@@ -172,17 +172,17 @@ App running at：
 
 | 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
-| Authorization | 是 | 认证信息；格式为：Basic base64(client_id:client_secret)，id和secret中间使用":"分隔，进行base64编码后传输 |
-| Content-type | 是 | 内容类型；application/json |
+| Authorization | &nbsp;&nbsp;是&nbsp;&nbsp; | 认证信息；格式为：Basic base64(client_id:client_secret)，id和secret中间使用":"分隔，进行base64编码后传输 |
+| Content-type | &nbsp;&nbsp;是&nbsp;&nbsp; | 内容类型；application/json |
 
 请求参数：
 
 | 名称 | 必填 | 说明 |
 | ---- | ---- | ---- | 
-| grant_type | 是 | 授权方式；authorization_type |
-| redirect_uri | 是 | 重定向地址；必须包含在客户端的重定向地址中 |
-| client_id | 是 | 客户端id |
-| code | 是 | 授权码 |
+| grant_type | &nbsp;&nbsp;是&nbsp;&nbsp; | 授权方式；authorization_type |
+| redirect_uri | &nbsp;&nbsp;是&nbsp;&nbsp; | 重定向地址；必须包含在客户端的重定向地址中 |
+| client_id | &nbsp;&nbsp;是&nbsp;&nbsp; | 客户端id |
+| code | &nbsp;&nbsp;是&nbsp;&nbsp; | 授权码 |
 
 响应数据：
 
@@ -208,13 +208,7 @@ App running at：
 
 | 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
-| Content-type | 是 | 内容类型；application/json |
-
-请求参数：
-
-| 名称 | 必填 | 说明 |
-| ---- | ---- | ---- | 
-| token | 是 | 刷新令牌；格式为：Bearer token |
+| Authorization | &nbsp;&nbsp;是&nbsp;&nbsp; | 认证信息；格式为：Bearer token；token为刷新令牌 |
 
 响应数据：
 
@@ -239,13 +233,13 @@ App running at：
 
 | 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
-| Content-type | 是 | 内容类型；application/json |
+| Content-type | &nbsp;&nbsp;是&nbsp;&nbsp; | 内容类型；application/json |
 
 请求参数：
 
 | 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
-| token | 是 | 令牌 |
+| token | &nbsp;&nbsp;是&nbsp;&nbsp; | 令牌；不包括'Bearer ' |
 
 响应数据：
 
@@ -271,14 +265,14 @@ App running at：
 
 | 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
-| Authorization | 是 | 认证信息；格式为：Basic base64(client_id:client_secret)，id和secret中间使用":"分隔，进行base64编码后传输 |
-| Content-type | 是 | 内容类型；application/json |
+| Authorization | &nbsp;&nbsp;是&nbsp;&nbsp; | 认证信息；格式为：Bearer token；token为访问令牌 |
+| Content-type | &nbsp;&nbsp;是&nbsp;&nbsp; | 内容类型；application/json |
 
 请求参数：
 
 | 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
-| client_id | 是 | 客户端id |
+| credential | &nbsp;&nbsp;是&nbsp;&nbsp; | 客户端认证信息；格式为：Basic base64(client_id:client_secret)，id和secret中间使用":"分隔，进行base64编码后传输 |
 
 响应数据：
 
@@ -301,8 +295,7 @@ App running at：
 
 | 名称 | 必填 | 说明 |
 | ---- | ---- | ---- |
-| Authorization | 是 | 认证信息；格式为：Bearer token；token为刷新令牌 |
-| Content-type | 是 | 内容类型；application/json |
+| Authorization | &nbsp;&nbsp;是&nbsp;&nbsp; | 认证信息；格式为：Bearer token；token为访问令牌 |
 
 响应数据：
 
