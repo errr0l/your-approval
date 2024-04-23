@@ -18,6 +18,7 @@ const errors = {
     INVALID_TOKEN: "invalid_token",
     SERVER_BUSY: "server_busy",
     TOKEN_REQUIRED: "token_required",
+    INVALID_SCOPE: "invalid_scope"
 };
 
 const grantTypes = {

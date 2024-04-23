@@ -15,3 +15,4 @@
 | INVALID_TOKEN | 无效的令牌 |
 | SERVER_BUSY | 服务器繁忙 |
 | INTERNAL_SERVER_ERROR | 服务器内部错误 |
+| INVALID_SCOPE | 无效的权限范围 |

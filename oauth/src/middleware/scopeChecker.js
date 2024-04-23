@@ -3,7 +3,7 @@ const { errors } = require("../constants/oauth");
 const { CODE_403 } = require("../../../common/src/constants/general");
 
 // 校验权限范围
-function scopeChecker(scope) {
+function scopeChecker(scopes) {
     return async function (ctx, next) {
         // 即tokenChecker的解析结果；
         const token = ctx.request.token;
@@ -11,10 +11,12 @@ function scopeChecker(scope) {
             throw new ClientException({ code: errors.ACCESS_DENIED, statusCode: CODE_403 });
         }
         const _scopes = token.scope.split(" ");
-
-        if (!_scopes.includes(scope)) {
-            throw new ClientException({ code: errors.ACCESS_DENIED, statusCode: CODE_403 });
+        for (const item of scopes) {
+            if (!_scopes.includes(item)) {
+                throw new ClientException({ code: errors.ACCESS_DENIED, statusCode: CODE_403 });
+            }
         }
+
         ctx.request.scopes = _scopes;
         await next();
     }

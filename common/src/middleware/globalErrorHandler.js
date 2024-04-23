@@ -12,7 +12,7 @@ async function globalErrorHandler(ctx, next) {
         const accept = req.headers['accept'];
         const bestMIMEType = getBestMIMEType(accept);
         const respData = { error: error.code || INTERNAL_SERVER_ERROR };
-        if (error instanceof OauthException) {
+        if (error instanceof OauthException && error.redirectUrl) {
             // joined：是否已经完成url拼接
             let url = error.redirectUrl;
             // 尽量按照规范...

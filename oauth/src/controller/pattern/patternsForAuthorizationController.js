@@ -46,17 +46,12 @@ const authorize = [{
             }
             else {
                 value = value.trim();
-                const scopes = config.oauth.scopes;
                 let containedOpenid = false;
                 const _scopes = value.split(" ");
-                const scopeArr = Object.keys(scopes);
                 for (let _scope of _scopes) {
-                    if (!scopeArr.includes(_scope)) {
-                        errors.push("无效的权限范围");
-                        break;
-                    }
                     if (!containedOpenid && (_scope === oidcScopes.OPENID)) {
                         containedOpenid = true;
+                        break;
                     }
                 }
                 // 如果使用了oidc，则必须包含openid

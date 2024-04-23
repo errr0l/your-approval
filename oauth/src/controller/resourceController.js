@@ -11,7 +11,7 @@ const router = new Router({
     prefix: "/oauth2"
 });
 
-router.get("/userinfo", compose([tokenChecker(), scopeChecker('openid')]), async (ctx) => {
+router.get("/userinfo", compose([tokenChecker(), scopeChecker(['openid'])]), async (ctx) => {
     const userId = ctx.request.tokenDecoded.userId;
     const user = await userService.getUserById(userId);
     ctx.body = {

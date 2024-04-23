@@ -176,12 +176,10 @@ router.post("/login", paramChecker(patterns.login), async (ctx) => {
 
 router.get("/authorize", paramChecker(patterns.authorize, {
     errorHandler: (errors, ctx) => {
-        if (ctx.request.query.redirect_uri) {
-            throw new OauthException({
-                code: oauthErrors.INVALID_REQUEST, message: errors.join(";"),
-                redirectUrl: decodeURIComponent(ctx.request.query.redirect_uri)
-            });
-        }
+        throw new OauthException({
+            code: oauthErrors.INVALID_REQUEST, message: errors.join(";"),
+            redirectUrl: decodeURIComponent(ctx.request.query.redirect_uri)
+        });
     },
     errorCode: oauthErrors.INVALID_REQUEST
 }), async (ctx, next) => {
@@ -216,8 +214,17 @@ router.get("/authorize", paramChecker(patterns.authorize, {
         requestStore.save(uuid, req);
         const scopes = config.oauth.scopes;
         let askedScopes = req._scopes;
-        if (!askedScopes) {
-            askedScopes = scope.trim().split(" ");
+        const clientScopes = client.scope.split(" ");
+        // 如果申请了客户端不存在的权限范围时，返回错误；
+        // 客户端的scope必须是授权服务器scope的子集，
+        // 这一点需要再客户端入库时（包括手动录入）做校验，否则判断会出现错误；
+        for (const askedScope of askedScopes) {
+            if (!clientScopes.includes(askedScope)) {
+                throw new OauthException({
+                    code: oauthErrors.INVALID_SCOPE,
+                    redirectUrl: decodeURIComponent(req.redirectUri)
+                });
+            }
         }
         tempData = {
             oauthClient: client, uuid, scopes, askedScopes, user

@@ -18,7 +18,7 @@ class SimpleMemoryStore {
     }
 
     save(key, value) {
-        if (this.keys.length > this.limit) {
+        if (this.keys.length >= this.limit) {
             throw new CustomException({ message: errors.SERVER_BUSY });
         }
         // 设置过期时间
