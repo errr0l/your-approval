@@ -43,7 +43,11 @@ async function executeWithTransaction(conn, pms) {
         }
     } finally {
         // 释放连接
-        conn.release();
+        try {
+            conn.release();
+        } catch (e) {
+            console.error("释放连接对象出现异常：", e);
+        }
     }
     return result;
 }

@@ -11,7 +11,7 @@ const { ClientException } = require("../exception/index");
  * @param opts.errorCode 错误码
  * @returns {(function(*, *))|*}
  */
-function paramChecker(patterns, opts= {}) {
+function paramChecker(patterns, opts = {}) {
     return async function (ctx, next) {
         const { errorHandler, errorCode } = opts;
         const query = ctx.request.query;
