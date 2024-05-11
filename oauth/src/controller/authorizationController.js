@@ -199,6 +199,10 @@ router.get("/authorize", compose([userLoader({ client: redisClient }), paramChec
                 redirectUrl: req.redirectUri
             });
         }
+        // 校验重定向地址
+        if (!client.redirect_uris.includes(req.redirectUri)) {
+            throw new ClientException({ code: oauthErrors.INVALID_REDIRECT_URI });
+        }
         const uuid = generateUuid();
         req.client = client;
         requestStore.save(uuid, req);
