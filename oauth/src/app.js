@@ -32,7 +32,9 @@ app.use(views(path.join(__dirname, "./views"), {
 }));
 app.use(_static(path.join(__dirname, '../static')));
 
-app.use(errorHandler);
+app.use(errorHandler({
+    urlPrefix: config.server.url_prefix || ""
+}));
 app.use(authorizationRouter.routes());
 app.use(resourceRouter.routes());
 app.use(testRouter.routes());

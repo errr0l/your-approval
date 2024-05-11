@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <title>approval</title>
-    <link rel="stylesheet" href="/css/layout1.css" />
+    <link rel="stylesheet" href="<%=urlPrefix%>/css/layout1.css" />
 </head>
 <body>
 <div id="main">
@@ -18,7 +18,7 @@
             <% } %>
             <div>
                 <% if (!user) { %>
-                <form class="form" action="/oauth2/login" method="POST">
+                <form class="form" action="<%=urlPrefix%>/oauth2/login" method="POST">
                     <input type="hidden" name="query" value="<%=query %>">
                     <p>
                         <label>
@@ -43,7 +43,7 @@
                 <p>尊敬的 <span class="distinguish1"><%=user.username%></span> ，</p>
                 <!-- 使用include时，名称为client的变量会冲突 -->
                 <p>[<%=oauthClient.name %>]正在向您请求以下权限：</p>
-                <form class="form" action="/oauth2/approve" method="POST">
+                <form class="form" action="<%=urlPrefix%>/oauth2/approve" method="POST">
                     <input type="hidden" name="uuid" value="<%=uuid %>">
                     <ul>
                         <% askedScopes.forEach(function (item) { %>
@@ -78,16 +78,17 @@
 <script>
     const btnRegister = document.querySelector("#btn-register");
     const btnLogout = document.querySelector("#btn-logout");
+    const urlPrefix = "<%=urlPrefix%>";
     window.sessionStorage.setItem("href", window.location.href);
     if (btnRegister) {
         btnRegister.addEventListener('click', function () {
-            window.location.href = "/oauth2/register" + window.location.search;
+            window.location.href = urlPrefix + "/oauth2/register" + window.location.search;
         });
     }
     if (btnLogout) {
         btnLogout.addEventListener('click', function () {
             if (window.confirm('确认登出')) {
-                window.location.href = "/oauth2/logout";
+                window.location.href = urlPrefix + "/oauth2/logout";
             }
         });
     }

@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <title>home</title>
-    <link rel="stylesheet" href="/css/layout1.css" />
+    <link rel="stylesheet" href="<%=urlPrefix%>/css/layout1.css" />
 </head>
 <body>
 <div id="main">
@@ -11,7 +11,12 @@
             <%- include('partial/p1.ejs'); -%>
         </div>
         <div class="right">
+            <% if (user) { %>
+            <div id="btn-logout">登出</div>
+            <div class="title"><%=title %>，<%=user.username%></div>
+            <% } else { %>
             <div class="title"><%=title %></div>
+            <% } %>
             <div>
                 <p><%=message %></p>
             </div>
@@ -19,4 +24,16 @@
     </div>
 </div>
 </body>
+
+<script>
+    const btnLogout = document.querySelector("#btn-logout");
+    const urlPrefix = "<%=urlPrefix%>";
+    if (btnLogout) {
+        btnLogout.addEventListener('click', function () {
+            if (window.confirm('确认登出')) {
+                window.location.href = urlPrefix + "/oauth2/logout";
+            }
+        });
+    }
+</script>
 </html>

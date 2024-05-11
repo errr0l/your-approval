@@ -20,12 +20,14 @@ const { buildUserinfo } = require("../../../common/src/util/oidcUtil");
 const emailService = require("../service/emailService");
 const { handler: tokenHandler, tokenChecker } = require("../middleware/tokenChecker");
 const { pool, executeWithTransaction } = require("../config/DBHelper");
+const urlPrefix = config.server.url_prefix || "";
+const userLoader = require("../../../common/src/middleware/userLoader");
 
 const router = new Router({
     prefix: "/oauth2"
 });
 
-router.get("/", async (ctx) => {
+router.get("/", userLoader({ client: redisClient }), async (ctx) => {
     const { from } = ctx.request.query;
     let title = "WELCOME";
     let message = ":D you're here.";
@@ -33,11 +35,11 @@ router.get("/", async (ctx) => {
         title = "BYE!";
         message = "hope to see you again.";
     }
-    await ctx.render("index", { title, message });
+    await ctx.render("index", { title, message, urlPrefix, user: ctx.request.user });
 });
 
 router.get("/register", async (ctx) => {
-    await ctx.render("register");
+    await ctx.render("register", { urlPrefix });
 });
 
 // 撤销授权；同样需要客户端id和秘钥
@@ -133,7 +135,7 @@ router.get("/logout", async (ctx) => {
             maxAge: 0
         });
     }
-    let path = "/oauth2?from=logout";
+    let path = urlPrefix + "/oauth2?from=logout";
     await ctx.redirect(path);
 });
 
@@ -171,10 +173,10 @@ router.post("/login", paramChecker(patterns.login), async (ctx) => {
     query = JSON.parse(query);
     query.redirect_uri = encodeURIComponent(query.redirect_uri);
     // 登陆后，跳转回授权页面（携带参数）
-    ctx.redirect(joinUrl("/oauth2/authorize", query));
+    ctx.redirect(joinUrl(urlPrefix + "/oauth2/authorize", query));
 });
 
-router.get("/authorize", paramChecker(patterns.authorize, {
+router.get("/authorize", compose([userLoader({ client: redisClient }), paramChecker(patterns.authorize, {
     errorHandler: (errors, ctx) => {
         throw new OauthException({
             code: oauthErrors.INVALID_REQUEST, message: errors.join(";"),
@@ -182,22 +184,10 @@ router.get("/authorize", paramChecker(patterns.authorize, {
         });
     },
     errorCode: oauthErrors.INVALID_REQUEST
-}), async (ctx, next) => {
+})]), async (ctx, next) => {
     const req = ctx.request;
     const { client_id: clientId, redirect_uri: redirectUri, scope } = req.query;
-    // 在session中获取user；
-    // 如果已经过期时，从redis中获取，并赋予session（相当于重新登陆）；
-    let user = ctx.session.user;
-    if (!user) {
-        const sessionToken = ctx.cookies.get("session_token");
-        if (sessionToken) {
-            const userStr = await redisClient.get(sessionToken);
-            if (userStr) {
-                user = JSON.parse(userStr);
-                ctx.session.user = user;
-            }
-        }
-    }
+    let user = ctx.request.user;
     let tempData;
     // 用户没登录时，不需要记录以下数据
     if (user) {
@@ -233,6 +223,7 @@ router.get("/authorize", paramChecker(patterns.authorize, {
     else {
         tempData = { user: null, query: JSON.stringify(req.query) };
     }
+    tempData['urlPrefix'] = urlPrefix;
     await ctx.render('approve', tempData);
 });
 
