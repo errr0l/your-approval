@@ -1,4 +1,4 @@
-const Router = require('koa-router');
+// const Router = require('koa-router');
 // const fs = require("fs");
 // const path = require("path");
 // const { parse } = require("../../../common/src/config/ini");
@@ -9,13 +9,13 @@ const Router = require('koa-router');
 // 在secrets文件夹下创建miniprogram_config.ini文件，并输入小程序的id和秘钥；
 // const miniprogramConfig = parse(fs.readFileSync(path.resolve(process.cwd(), "./secrets/miniprogram-config.ini"), { encoding: 'utf-8' }));
 // const miniprogram1 = miniprogramConfig.miniprogram1;
-const { codeStore, requestStore } = require("../store");
-
-const router = new Router({ prefix: "/test" });
-
-router.get("/", async (ctx) => {
-    await ctx.render("welcome to your-approval.");
-});
+// const { codeStore, requestStore } = require("../store");
+//
+// const router = new Router({ prefix: "/test" });
+//
+// router.get("/", async (ctx) => {
+//     await ctx.render("welcome to your-approval.");
+// });
 
 // 获取微信小程序用户信息（登陆？）；
 // 就目前来看，调用接口有用的信息只有openid和session_key；
@@ -47,13 +47,13 @@ router.get("/", async (ctx) => {
 //     ctx.body = { error: "", payload: userinfo};
 // });
 
-router.get("/storeInfo", (ctx, next) => {
-    ctx.body = {
-        error: '', payload: {
-            codeStore,
-            requestStore
-        }
-    };
-});
-
-module.exports = router;
+// router.get("/storeInfo", (ctx, next) => {
+//     ctx.body = {
+//         error: '', payload: {
+//             codeStore,
+//             requestStore
+//         }
+//     };
+// });
+//
+// module.exports = router;

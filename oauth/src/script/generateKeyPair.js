@@ -19,7 +19,7 @@ const { publicKey, privateKey } = crypto.generateKeyPairSync("rsa", {
 });
 
 try {
-    const dir = path.resolve(process.cwd(), './secrets');
+    const dir = path.resolve(__dirname, '../../secrets');
     if (!fs.existsSync(dir)) {
         fs.mkdirSync(dir);
     }

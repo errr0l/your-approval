@@ -1,5 +1,6 @@
 const { ejs } = require("koa-ejs");
 const fs = require("fs");
+const path = require("path");
 
 const { createTransporter } = require("../../../common/src/util/emailUtil");
 const config = require("../config/appConfig");
@@ -28,7 +29,7 @@ async function setEmailCode(email) {
             from: '" ' + config.server.name.toUpperCase() + ' " <' + config.email.username + '>',
             to: email,
             subject: `请查收您的验证码`,
-            html: ejs.render(fs.readFileSync(config.rootDir + "/src/views/code1.ejs", { encoding: 'utf-8' }), { code, expiresIn }), // html body
+            html: ejs.render(fs.readFileSync(path.resolve(__dirname, "../views/code1.ejs"), { encoding: 'utf-8' }), { code, expiresIn }), // html body
         });
         console.log("sending email %s: ", sendingResp.messageId);
     } catch (error) {

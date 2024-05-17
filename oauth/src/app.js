@@ -12,7 +12,7 @@ const app = new Koa();
 
 const authorizationRouter = require("./controller/authorizationController");
 const resourceRouter = require("./controller/resourceController");
-const testRouter = require("./controller/testController");
+// const testRouter = require("./controller/testController");
 const assistRouter = require("./controller/assistController");
 
 const config = require("./config/appConfig");
@@ -37,7 +37,7 @@ app.use(errorHandler({
 }));
 app.use(authorizationRouter.routes());
 app.use(resourceRouter.routes());
-app.use(testRouter.routes());
+// app.use(testRouter.routes());
 app.use(assistRouter.routes());
 
 // 如果不在listen方法中指定绑定的地址的话，通过ip或localhost都可以访问；

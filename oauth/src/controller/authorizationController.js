@@ -212,6 +212,7 @@ router.get("/authorize", compose([userLoader({ client: redisClient }), paramChec
         // 如果申请了客户端不存在的权限范围时，返回错误；
         // 客户端的scope必须是授权服务器scope的子集，
         // 这一点需要再客户端入库时（包括手动录入）做校验，否则判断会出现错误；
+        const actual = [];
         for (const askedScope of askedScopes) {
             if (!clientScopes.includes(askedScope)) {
                 throw new OauthException({
@@ -219,9 +220,13 @@ router.get("/authorize", compose([userLoader({ client: redisClient }), paramChec
                     redirectUrl: decodeURIComponent(req.redirectUri)
                 });
             }
+            // 处理数据库跟服务器配置不同步的情况
+            if (scopes[askedScope]) {
+                actual.push(askedScope);
+            }
         }
         tempData = {
-            oauthClient: client, uuid, scopes, askedScopes, user
+            oauthClient: client, uuid, scopes, askedScopes: actual, user
         };
     }
     else {

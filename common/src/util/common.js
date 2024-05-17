@@ -81,6 +81,12 @@ function getIp() {
     return ipAddress;
 }
 
+// 根据相对位置解析路径；
+// function resolvePath(dirname, path) {
+//     return path.join(dirname, path);
+// }
+
 module.exports = {
-    decodeClientCredentials, encodeWithMd5, getScopesFromBody, generateUuid, getIp
+    decodeClientCredentials, encodeWithMd5, getScopesFromBody, generateUuid, getIp,
+    // resolvePath
 };
