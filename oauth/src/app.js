@@ -53,3 +53,12 @@ const server = app.listen(config.server.port, function () {
     console.log("- http://%s:%s", host, port);
     console.log('- http://%s:%s', ip, port);
 });
+
+process.on('uncaughtException', (error) => {
+    console.error('未捕获的异常：', error);
+});
+
+
+process.on('unhandledRejection', (reason, promise) => {
+    console.error('未处理的拒绝：', promise, '原因：', reason);
+});
