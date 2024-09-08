@@ -338,6 +338,10 @@ router.post("/token", paramChecker(patterns.token, {
         const redisResp = await redisClient.del(_token.id);
         console.log("redis删除结果：", redisResp);
     }
+    // if (!user.openid) {
+    //     console.log("生成openid");
+    //     pms.push(conn.execute(userService.sqlMap.updateOpenid, [user.id, openid]));
+    // }
     const tokenEntity = {
         id: tokenId,
         accessToken,

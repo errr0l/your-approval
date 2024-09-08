@@ -1,8 +1,8 @@
--- MySQL dump 10.13  Distrib 5.7.8-rc, for osx10.8 (x86_64)
+-- MySQL dump 10.13  Distrib 5.7.34, for osx10.16 (x86_64)
 --
--- Host: localhost    Database: your_approval
+-- Host: localhost    Database: your-approval
 -- ------------------------------------------------------
--- Server version	5.7.8-rc
+-- Server version	5.7.34
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -29,7 +29,7 @@ CREATE TABLE `client` (
   `scope` varchar(255) DEFAULT NULL,
   `name` varchar(50) DEFAULT NULL,
   `description` varchar(255) DEFAULT NULL,
-  `status` tinyint(4) DEFAULT '1',
+  `status` tinyint(4) DEFAULT 1,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=3 DEFAULT CHARSET=utf8 COMMENT='oauth客户端';
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -40,7 +40,7 @@ CREATE TABLE `client` (
 
 LOCK TABLES `client` WRITE;
 /*!40000 ALTER TABLE `client` DISABLE KEYS */;
-INSERT INTO `client` VALUES (1,'easyblog@12321','http://localhost:9528/easyblog/admin/#/oauth2/callback','openid profile email test','easyblog','',1),(2,'easyums@demo1','http://localhost:8887/#/oauth2/callback','openid profile email','测试客户端2',NULL,1);
+INSERT INTO `client` VALUES (1,'easyblog@12321','http://localhost:9528/easyblog/admin/#/oauth2/callback','openid,profile,email','easyblog','',1),(2,'easyums@demo1','http://localhost:8887/#/oauth2/callback','openid profile email','测试客户端2',NULL,1);
 /*!40000 ALTER TABLE `client` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -69,7 +69,6 @@ CREATE TABLE `token` (
 
 LOCK TABLES `token` WRITE;
 /*!40000 ALTER TABLE `token` DISABLE KEYS */;
-INSERT INTO `token` VALUES ('df199ee06775438f9cea00068364874a','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6MSwidXNlcklkIjoxLCJ0b2tlbklkIjoiZGYxOTllZTA2Nzc1NDM4ZjljZWEwMDA2ODM2NDg3NGEiLCJ0eXBlIjoiYWNjZXNzX3Rva2VuIiwiaWF0IjoxNzI1NDI1OTg1LCJleHAiOjE3MjU0MzMxODUsImlzcyI6InlvdXItYXBwcm92YWwifQ.dHAQkdINR2JV9YjsSCyL4bS4YWk9Pd5b-w8XvizR4-o','eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJjbGllbnRJZCI6MSwidXNlcklkIjoxLCJ0b2tlbklkIjoiZGYxOTllZTA2Nzc1NDM4ZjljZWEwMDA2ODM2NDg3NGEiLCJ0eXBlIjoicmVmcmVzaF90b2tlbiIsImlhdCI6MTcyNTQyNTk4NSwiZXhwIjoxNzI2MDMwNzg1LCJpc3MiOiJ5b3VyLWFwcHJvdmFsIn0.FPOTnAUdfDieuEDCLBolFDg3Qxy5KiLoKFO-TnwzWko',1,'openid profile email',1);
 /*!40000 ALTER TABLE `token` ENABLE KEYS */;
 UNLOCK TABLES;
 
@@ -89,6 +88,7 @@ CREATE TABLE `user` (
   `email` varchar(100) DEFAULT NULL COMMENT '邮箱',
   `state` tinyint(4) DEFAULT '1' COMMENT '1正常，2禁用',
   `introduction` mediumtext COMMENT '简介',
+  `openid` varchar(100) COMMENT 'openid',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8;
 /*!40101 SET character_set_client = @saved_cs_client */;
@@ -99,7 +99,7 @@ CREATE TABLE `user` (
 
 LOCK TABLES `user` WRITE;
 /*!40000 ALTER TABLE `user` DISABLE KEYS */;
-INSERT INTO `user` VALUES (1,'errol','e10adc3949ba59abbe56e057f20f883e','','2024-04-22 20:12:55.452','2444016558@qq.com',1,'');
+INSERT INTO `user` VALUES (1,'errol','e10adc3949ba59abbe56e057f20f883e','','2024-04-22 20:12:55.452','2444016558@qq.com',1,'', null);
 /*!40000 ALTER TABLE `user` ENABLE KEYS */;
 UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
@@ -112,4 +112,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2024-09-04 13:41:50
+-- Dump completed on 2024-04-22 20:16:13

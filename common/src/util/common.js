@@ -57,7 +57,9 @@ function getScopesFromBody(scopes) {
 function generateUuid(withoutLine = true) {
     let uuid = uuidV4();
     if (withoutLine) {
-        uuid = uuid.replaceAll("-", "");
+        // 可能与nodejs的版本有关，当前版本为14，使用该方法时出现错误
+        // uuid = uuid.replaceAll("-", "");
+        uuid = uuid.replace(/-/g, '');
     }
     return uuid;
 }

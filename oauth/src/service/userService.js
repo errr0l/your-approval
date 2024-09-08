@@ -2,6 +2,10 @@ const { pool } = require("../config/DBHelper");
 const { encodeWithMd5 } = require("../../../common/src/util/common");
 const { ClientException } = require("../../../common/src/exception");
 
+// const sqlMap = {
+//     "updateOpenid": "update `user` set `openid` = ? where `id` = ?"
+// };
+
 // 账号密码登录；
 // username可以是用户名或邮箱
 async function login(username, password) {
@@ -31,6 +35,13 @@ async function getUserById(id) {
     return user;
 }
 
+// async function updateOpenid(id, openid) {
+//     // const sql = "update `token` set `access_token` = ?, `refresh_token` = ? where `id` = ?";
+//     // const sql = "update `user` set `openid` = ? where `id` = ?";
+//     const [result] = await pool.query(sqlMap.updateOpenid, [openid, id]);
+//     return result.affectedRows === 1;
+// }
+
 // 注册账号；
 // 用户名和邮箱必须唯一
 async function register(user) {
@@ -53,5 +64,6 @@ async function register(user) {
 }
 
 module.exports = {
-    login, register, getUserById
+    login, register, getUserById, updateOpenid,
+    //sqlMap
 };
