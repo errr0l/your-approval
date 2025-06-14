@@ -35,12 +35,12 @@ async function getUserById(id) {
     return user;
 }
 
-// async function updateOpenid(id, openid) {
-//     // const sql = "update `token` set `access_token` = ?, `refresh_token` = ? where `id` = ?";
-//     // const sql = "update `user` set `openid` = ? where `id` = ?";
-//     const [result] = await pool.query(sqlMap.updateOpenid, [openid, id]);
-//     return result.affectedRows === 1;
-// }
+async function updateOpenid(id, openid) {
+    // const sql = "update `token` set `access_token` = ?, `refresh_token` = ? where `id` = ?";
+    const sql = "update `user` set `openid` = ? where `id` = ?";
+    const [result] = await pool.query(sql, [openid, id]);
+    return result.affectedRows === 1;
+}
 
 // 注册账号；
 // 用户名和邮箱必须唯一

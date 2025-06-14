@@ -14,11 +14,11 @@
             <% if (user) { %>
             <div class="title">APPROVAL</div>
             <% } else { %>
-            <div class="title">LOGIN</div>
+            <div class="title">AUTHENTICATE</div>
             <% } %>
             <div>
                 <% if (!user) { %>
-                <form class="form" action="<%=urlPrefix%>/oauth2/login" method="POST">
+                <form class="form" action="<%=urlPrefix%>/oauth2/authenticate" method="POST">
                     <input type="hidden" name="query" value="<%=query %>">
                     <p>
                         <label>

@@ -22,12 +22,13 @@ const { handler: tokenHandler, tokenChecker } = require("../middleware/tokenChec
 const { pool, executeWithTransaction } = require("../config/DBHelper");
 const urlPrefix = config.server.url_prefix || "";
 const userLoader = require("../../../common/src/middleware/userLoader");
+const { saveToDisk, readFromDisk } = require("../util/localUserStoreUtil");
 
 const router = new Router({
     prefix: "/oauth2"
 });
 
-router.get("/", userLoader({ client: redisClient }), async (ctx) => {
+router.get("/", userLoader({ client: redisClient, readFromDisk }), async (ctx) => {
     const { from } = ctx.request.query;
     let title = "WELCOME";
     let message = ":D you're here.";
@@ -130,7 +131,6 @@ router.get("/logout", async (ctx) => {
     if (sessionToken) {
         console.log("删除sessionToken：" + sessionToken);
         const result = await redisClient.del(sessionToken);
-        console.log(result);
         ctx.cookies.set('session_token', "", {
             maxAge: 0
         });
@@ -151,32 +151,33 @@ router.post("/register", paramChecker(patterns.register), async (ctx) => {
     }
 });
 
-// 登陆成功后，会记录在redis中（七天）；
 // 为防止使用过期缓存，在修改用户信息时，或许应该把缓存修改？先不管
-router.post("/login", paramChecker(patterns.login), async (ctx) => {
+router.post("/authenticate", paramChecker(patterns.authenticate), async (ctx) => {
     let { username, password, query } = ctx.request.body;
     const user = await userService.login(username, password);
     ctx.session.user = user;
     const sessionToken = generateUuid();
-    const seconds = 60 * 60 * 24 * 7;
     const date = new Date();
-    const milliseconds = seconds * 1000;
-    date.setTime(date.getTime() + milliseconds);
+    // 获取当前毫秒
+    const ms1 = date.getTime();
+    date.setMonth(date.getMonth() + +config.cookie.session_token_ttl);
+    const ms2 = date.getTime();
+    const milliseconds = ms2 - ms1;
     ctx.cookies.set('session_token', sessionToken, {
-        maxAge: milliseconds,
-        expires: date
+        maxAge: milliseconds
     });
-    const resp = await redisClient.set(sessionToken, JSON.stringify(user), "EX", seconds);
+    query = JSON.parse(query);
+    query.redirect_uri = encodeURIComponent(query.redirect_uri);
+    const resp = await redisClient.set(sessionToken, JSON.stringify(user), "EX", 60 * 60 * 24 * 7);
     if (REDIS_OK !== resp) {
         throw new CustomException();
     }
-    query = JSON.parse(query);
-    query.redirect_uri = encodeURIComponent(query.redirect_uri);
+    saveToDisk(sessionToken, user, ms2);
     // 登陆后，跳转回授权页面（携带参数）
     ctx.redirect(joinUrl(urlPrefix + "/oauth2/authorize", query));
 });
 
-router.get("/authorize", compose([userLoader({ client: redisClient }), paramChecker(patterns.authorize, {
+router.get("/authorize", compose([userLoader({ client: redisClient, readFromDisk }), paramChecker(patterns.authorize, {
     errorHandler: (errors, ctx) => {
         throw new OauthException({
             code: oauthErrors.INVALID_REQUEST, message: errors.join(";"),

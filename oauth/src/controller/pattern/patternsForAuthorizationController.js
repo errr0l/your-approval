@@ -125,7 +125,7 @@ const token = [{
     }]
 }];
 
-const login = [{
+const authenticate = [{
     position: PARAM_POSITION_BODY,
     rules: [{
         name: "username",
@@ -199,6 +199,6 @@ const revoke = [{
 }];
 
 module.exports = {
-    authorize: authorize, approve: approve, token: token, login: login, register: register, emailRule,
+    authorize: authorize, approve: approve, token: token, authenticate: authenticate, register: register, emailRule,
     verify, revoke
 }
