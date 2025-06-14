@@ -17,3 +17,4 @@ app.ini
 *.ntvs*
 *.njsproj
 *.sln
+user.json
