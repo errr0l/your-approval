@@ -17,6 +17,9 @@ function userLoader(params) {
                 else if(typeof readFromDisk === 'function') {
                     ctx.session.user = readFromDisk(sessionToken);
                 }
+                if (ctx.session.user) {
+                    client.set(sessionToken, JSON.stringify(ctx.session.user), "EX", 60 * 60 * 24 * 7);
+                }
             }
         }
         ctx.request.user = ctx.session.user;

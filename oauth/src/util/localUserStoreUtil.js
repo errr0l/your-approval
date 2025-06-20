@@ -20,18 +20,16 @@ function saveToDisk(key, user, ttl) {
 
         // 清理过期
         if (Math.floor(Math.random() * 10 + 1) > 5) {
-            users = users.filter(item => valid(item.ttl))
+            users = Object.values(users).filter(item => valid(item.ttl))
         }
     }
     else {
-        users = [];
+        users = {};
     }
-    users.push({
-        [key]: {
-            user,
-            ttl
-        }
-    });
+    users[key] = {
+        user,
+        ttl
+    };
     writeFile(JSON.stringify(users));
 }
 
@@ -42,11 +40,10 @@ function writeFile(content) {
 // 如果已过期时，要求重新认证
 function readFromDisk(key) {
     const users = JSON.parse(fs.readFileSync(storePath, "utf-8"));
-    const user = users[key];
-
-    if (user) {
-        if (valid(user.ttl)) {
-            return user;
+    const item = users[key];
+    if (item) {
+        if (valid(item.ttl)) {
+            return item.user;
         }
         else {
             delete users[key];
