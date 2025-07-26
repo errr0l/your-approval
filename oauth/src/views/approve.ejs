@@ -44,7 +44,6 @@
                 <!-- 使用include时，名称为client的变量会冲突 -->
                 <p>[<%=oauthClient.name %>]正在向您请求以下权限：</p>
                 <form class="form" action="<%=urlPrefix%>/oauth2/approve" method="POST">
-                    <input type="hidden" name="uuid" value="<%=uuid %>">
                     <ul>
                         <% askedScopes.forEach(function (item) { %>
                             <% var openid = item === 'openid'; %>

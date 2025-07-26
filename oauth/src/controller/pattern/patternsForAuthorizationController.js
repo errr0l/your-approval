@@ -66,27 +66,27 @@ const authorize = [{
     }]
 }];
 
-const approve = [{
-    position: PARAM_POSITION_BODY,
-    rules: [{
-        name: "uuid",
-        required: true,
-    }, {
-        name: "action",
-        validator(value, _this, ctx) {
-            let errors = [];
-            if (!value) {
-                errors.push(this.name + "不能为空");
-            }
-            else {
-                if (value !== ACT_1 && value !== ACT_2) {
-                    errors.push(this.name + "格式错误")
-                }
-            }
-            return errors;
-        }
-    }]
-}];
+// const approve = [{
+//     position: PARAM_POSITION_BODY,
+//     rules: [{
+//         name: "uuid",
+//         required: true,
+//     }, {
+//         name: "action",
+//         validator(value, _this, ctx) {
+//             let errors = [];
+//             if (!value) {
+//                 errors.push(this.name + "不能为空");
+//             }
+//             else {
+//                 if (value !== ACT_1 && value !== ACT_2) {
+//                     errors.push(this.name + "格式错误")
+//                 }
+//             }
+//             return errors;
+//         }
+//     }]
+// }];
 
 const token = [{
     position: PARAM_POSITION_BODY,
@@ -199,6 +199,7 @@ const revoke = [{
 }];
 
 module.exports = {
-    authorize: authorize, approve: approve, token: token, authenticate: authenticate, register: register, emailRule,
+    authorize: authorize, // approve: approve, 
+    token: token, authenticate: authenticate, register: register, emailRule,
     verify, revoke
 }

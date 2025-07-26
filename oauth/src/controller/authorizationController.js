@@ -12,7 +12,7 @@ const paramChecker = require("../../../common/src/middleware/paramChecker");
 const { OauthException, CustomException, ClientException } = require("../../../common/src/exception");
 const clientService = require("../service/clientService");
 const { decodeClientCredentials, getScopesFromBody, generateUuid, encodeWithMd5 } = require("../../../common/src/util/common");
-const { codeStore, requestStore } = require("../store");
+const { codeStore } = require("../store");
 const config = require("../config/appConfig");
 const userService = require("../service/userService");
 const { client: redisClient } = require("../config/redisHelper");
@@ -187,28 +187,37 @@ router.get("/authorize", compose([userLoader({ client: redisClient, readFromDisk
     errorCode: oauthErrors.INVALID_REQUEST
 })]), async (ctx, next) => {
     const req = ctx.request;
-    const { client_id: clientId, redirect_uri: redirectUri, scope } = req.query;
+    const { client_id: clientId, redirect_uri: redirectUri } = req.query;
     let user = ctx.request.user;
     let tempData;
     // 用户没登录时，不需要记录以下数据
     if (user) {
-        const client = await clientService.getClientById(clientId);
-        req.redirectUri = decodeURIComponent(redirectUri);
+        const clientKey = `client_${clientId}`;
+        let client;
+        if (!(client = ctx.session[clientKey])) {
+            client = await clientService.getClientById(clientId);
+            ctx.session[clientKey] = client;
+        }
+        const _redirectUri = decodeURIComponent(redirectUri);
         if (!client) {
             throw new OauthException({
                 code: oauthErrors.UNKNOWN_CLIENT,
-                redirectUrl: req.redirectUri
+                redirectUrl: _redirectUri
             });
         }
         // 校验重定向地址
-        if (!client.redirect_uris.includes(req.redirectUri)) {
+        if (!client.redirect_uris.includes(_redirectUri)) {
             throw new ClientException({ code: oauthErrors.INVALID_REDIRECT_URI });
         }
-        const uuid = generateUuid();
-        req.client = client;
-        requestStore.save(uuid, req);
+        // 保存一些必要的数据给下个请求使用
+        ctx.session.preReqData = {
+            query: req.query,
+            redirectUri: _redirectUri,
+            client,
+            _containedOpenid: req._containedOpenid
+        };
         const scopes = config.oauth.scopes;
-        let askedScopes = req._scopes;
+        let askedScopes = req._scopes; // 在中间件处理的
         const clientScopes = client.scope.split(" ");
         // 如果申请了客户端不存在的权限范围时，返回错误；
         // 客户端的scope必须是授权服务器scope的子集，
@@ -227,7 +236,7 @@ router.get("/authorize", compose([userLoader({ client: redisClient, readFromDisk
             }
         }
         tempData = {
-            oauthClient: client, uuid, scopes, askedScopes: actual, user
+            oauthClient: client, scopes, askedScopes: actual, user
         };
     }
     else {
@@ -238,15 +247,17 @@ router.get("/authorize", compose([userLoader({ client: redisClient, readFromDisk
 });
 
 // 用户可在授权页面上进行操作；
-router.post("/approve", paramChecker(patterns.approve), async (ctx, next) => {
-    const { action, uuid, ...scopes } = ctx.request.body;
+router.post("/approve", async (ctx, next) => {
+    const { action, ...scopes } = ctx.request.body;
     const _scopes = getScopesFromBody(scopes); // 即真正授权范围
-    const preReq = requestStore.get(uuid);
-    if (!preReq) {
+    // const preReq = requestStore.get(uuid);
+    // 获取上一个请求
+    const preReqData = ctx.session.preReqData;
+    if (!preReqData) {
         throw new CustomException({ code: oauthErrors.UNKNOWN_REQUEST });
     }
-    let { response_type: responseType, state } = preReq.query;
-    const redirectUri = preReq.redirectUri;
+    let { response_type: responseType, state } = preReqData.query;
+    const redirectUri = preReqData.redirectUri;
     const queries = {};
     // 同意授权
     if (action === ACT_1) {
@@ -257,11 +268,11 @@ router.post("/approve", paramChecker(patterns.approve), async (ctx, next) => {
             if (state) {
                 queries['state'] = state;
             }
-            const client = preReq.client;
+            const client = preReqData.client;
             const req = ctx.request;
             req.client = client;
             req.scopes = _scopes;
-            req._containedOpenid = preReq._containedOpenid;
+            req._containedOpenid = preReqData._containedOpenid;
             req.user = ctx.session.user;
             codeStore.save(code, req);
         }
@@ -339,10 +350,6 @@ router.post("/token", paramChecker(patterns.token, {
         const redisResp = await redisClient.del(_token.id);
         console.log("redis删除结果：", redisResp);
     }
-    // if (!user.openid) {
-    //     console.log("生成openid");
-    //     pms.push(conn.execute(userService.sqlMap.updateOpenid, [user.id, openid]));
-    // }
     const tokenEntity = {
         id: tokenId,
         accessToken,
